@@ -1,5 +1,9 @@
 #!/bin/bash
+# Check the battery level of the laptop.
+# it is useful for window managers like i3
+
 sleep 60
+
 notify-send "You will be prompted for the password for the battery monitor"
 sleep 5
 if [ $UID != 0 ]
