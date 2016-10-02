@@ -1,7 +1,24 @@
 #!/bin/bash
+# Select a random wallpaper from my folder every 5 minutes.
+# compatible with all the window managers that support feh
+# Copyright (C) 2016 Mauricio Luis de Medeiros
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# License GPL v2
+# https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 wallpid=$(ps axo pid,cmd | grep select-wall | grep -v grep | awk '{print $1}')
 kill -9 $(echo $wallpid | sed 's/\$\$/g')
-find /home/mauricio/Pictures/Wallpaper -type f -iname "*.jpg" -exec echo "{}" >> /tmp/.wall \;
+find ~/Pictures/Wallpaper -type f -iname "*.jpg" -exec echo "{}" >> /tmp/.wall \;
 while [ 1 ]
 do echo selecting
 a=$(shuf -i 1-$(cat /tmp/.wall | wc -l) -n 1)
