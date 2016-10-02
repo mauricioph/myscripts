@@ -1,4 +1,21 @@
 #!/bin/bash
+# Rip DVD and add to the plex media server Library
+# Copyright (C) 2016 Mauricio Luis de Medeiros
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# License GPL v2
+# https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
 export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 
 #upperlim=10
@@ -17,6 +34,9 @@ title=$(lsdvd | grep "$(lsdvd | cut -d " " -f 4 | sort | tail -n 1)" | cut -d " 
 echo "Checking"
 if [ -f "/dump/${disc}-${title}.vob" ]
 then echo "Found file /dump/${disc}-${title}.vob"
+if [[ $title < 10 ]]
+then i=$(echo $title | sed 's/0//')
+fi
 else /usr/bin/mplayer dvd://${i} -dumpstream -dumpfile "/dump/${disc}-${title}.vob" -vo null -vc null -ao null
 fi
 
