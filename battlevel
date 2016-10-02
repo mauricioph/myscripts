@@ -1,6 +1,8 @@
 #!/bin/bash
 # Check the battery level of the laptop.
 # it is useful for window managers like i3
+# License GPL v2
+# https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
 sleep 60
 
