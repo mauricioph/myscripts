@@ -1,4 +1,7 @@
 #!/bin/bash
+# This script will kill all the share apps running
+# Dropbox, MegaSync and Teamviewer.
+
 dbox=$(ps axo pid,cmd | grep dropbox | grep -v grep | awk '{print $1}')
 for i in $dbox;
 do kill -9 $i > /dev/null;
