@@ -1,0 +1,24 @@
+#!/bin/bash
+dbox=$(ps axo pid,cmd | grep dropbox | grep -v grep | awk '{print $1}')
+for i in $dbox;
+do kill -9 $i > /dev/null;
+done
+
+mgsyn=$(ps axo pid,cmd | grep megasync | grep -v grep | awk '{print $1}')
+for x in $mgsyn;
+do kill -9 $x > /dev/null;
+done
+
+
+tv=$(ps axo pid,cmd | grep TeamViewer.exe | grep -v grep | awk '{print $1}')
+
+pergunta=$(zenity --question --text "Do you want to kill TeamViewer?" --ok-label="Sure" --cancel-label="No Way" > /dev/null 1>&2) 
+
+[ $? -eq 0 ] || exit 1
+
+for g in $tv;
+do kill -9 $g > /dev/null;
+done
+
+find $HOME -iname "*.tvs" -exec rm -f "{}" \; > /dev/null 2>&1
+notify-send -i display "All teamviewer recordings for $USER were deleted"

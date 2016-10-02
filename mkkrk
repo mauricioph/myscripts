@@ -1,0 +1,10 @@
+#!/bin/bash
+cd  $(pwd)
+echo $(pwd)
+sleep 10
+for i in *.mp4
+do echo Analizing "$i"
+mencoder "$i" -ovc xvid -vf scale=720:480,harddup -ofps 30000/1001 -xvidencopts pass=1:turbo:autoaspect -passlogfile "${i}.log" -nosound -o /dev/null 2>&1
+echo Converting "$i"
+mencoder "$i" -ovc xvid -vf scale=720:480,harddup -ofps 30000/1001 -xvidencopts bitrate=1500:autoaspect:pass=2 -passlogfile "${i}.log" -oac mp3lame -lameopts vbr=3 -o "$(echo $i | sed 's/\.mp4/\.avi/g')" > /dev/null 2>&1 
+done

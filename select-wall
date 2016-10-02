@@ -1,0 +1,11 @@
+#!/bin/bash
+wallpid=$(ps axo pid,cmd | grep select-wall | grep -v grep | awk '{print $1}')
+kill -9 $(echo $wallpid | sed 's/\$\$/g')
+find /home/mauricio/Pictures/Wallpaper -type f -iname "*.jpg" -exec echo "{}" >> /tmp/.wall \;
+while [ 1 ]
+do echo selecting
+a=$(shuf -i 1-$(cat /tmp/.wall | wc -l) -n 1)
+wallpaper=$(cat /tmp/.wall | sed -n ${a}p)
+feh --bg-scale "$wallpaper"
+sleep 300
+done
