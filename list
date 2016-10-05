@@ -19,7 +19,6 @@
 export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 
 #upperlim=10
-
 #for ((i=0; i<=upperlim; i++)); do
 #   echo "$i"
 #done
@@ -29,15 +28,20 @@ if [ ! -f /dump/ripping ]
 then disc=$(lsdvd | grep Disc\ Title | cut -d ":" -f 2 | awk '{print $1}')
 if [[ -n $disc ]]
 then echo "Ripping ${disc} since $(date +%H:%M)" >> /dump/ripping
-
-title=$(lsdvd | grep "$(lsdvd | cut -d " " -f 4 | sort | tail -n 1)" | cut -d " " -f 2 | sed 's/,//g')
+mkdir -p /dump/${disc}
+lenghtitle=$(lsdvd | cut -d " " -f 4 | sort | tail -n 1)
 echo "Checking"
-if [ -f "/dump/${disc}-${title}.vob" ]
-then echo "Found file /dump/${disc}-${title}.vob"
+title=$(lsdvd | sort | grep "${lenghtitle}" | cut -d " " -f 2 | sed 's/,//')
+
 if [[ $title < 10 ]]
-then i=$(echo $title | sed 's/0//')
+then echo "getting the title"
+track=$(echo $title | sed 's/0//')
+else track=$title
 fi
-else /usr/bin/mplayer dvd://${i} -dumpstream -dumpfile "/dump/${disc}-${title}.vob" -vo null -vc null -ao null
+
+if [ -f "/dump/${disc}-${track}.vob" ]
+then echo "Found file /dump/${disc}-${track}.vob"
+else /usr/bin/mplayer dvd://${track} -dumpstream -dumpfile /dump/${disc}-${track}.vob -vo null -vc null -ao null
 fi
 
 
@@ -45,15 +49,15 @@ echo "Ripping is finished, you can eject the dvd. Starting the convertion at $(d
 eject
 
 
-mkdir -p "/home/plex/tmp/${disc}"
+mkdir -p "/dump/${disc}/converted"
 
-for x in /dump/*.vob
+for x in /dump/${disc}-${track}.vob
 do echo "Checking before convert"
-if [ -f "/home/plex/tmp/${disc}/${disc}-${i}.vob" ]
-then echo "found  converted file to redo the convertion delete that file"
-else /usr/bin/HandBrakeCLI -i "/dump/${disc}-${x}.vob" -o "/home/plex/tmp/${disc}/${disc}-${x}.mp4" -e x264  -q 20.0 -a 1,1 -E faac,copy:ac3 -B 160,160 -6 dpl2,none -R Auto,Auto -D 0.0,0.0 --audio-copy-mask aac,ac3,dtshd,dts,mp3 --audio-fallback ffac3 -f mp4 -4 --decomb --loose-anamorphic --modulus 2 -m --x264-preset medium --h264-profile high --h264-level 4.1
-echo "Converting /dump/${disc}-$x.vob" >> /dump/ripping
-rm "/dump/${disc}-${x}.vob"
+if [ -f "/dump/${disc}/converted/${disc}-${track}.mp4" ]
+then echo "found  converted file to redo the convertion delete that file" >> /dump/rejected
+else /usr/bin/HandBrakeCLI -i "/dump/${disc}-${track}.vob" -o "/dump/${disc}/converted/${disc}-${track}.mp4" -e x264  -q 20.0 -a 1,1 -E faac,copy:ac3 -B 160,160 -6 dpl2,none -R Auto,Auto -D 0.0,0.0 --audio-copy-mask aac,ac3,dtshd,dts,mp3 --audio-fallback ffac3 -f mp4 -4 --decomb --loose-anamorphic --modulus 2 -m --x264-preset medium --h264-profile high --h264-level 4.1 -s "1,2,3,4,5,6"
+echo "Converting /dump/${disc}/converted/${disc}-${track}.vob" >> /dump/ripping
+rm "/dump/${disc}-${track}.vob"
 fi
 done
 rm /dump/ripping
