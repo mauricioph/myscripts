@@ -10,59 +10,75 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 # License GPL v2
 # https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
-
-#upperlim=10
-#for ((i=0; i<=upperlim; i++)); do
+# for loop with variable.
+# upperlim=10
+#  for ((i=0; i<=upperlim; i++)); do
 #   echo "$i"
-#done
-# if [[ -n $disc ]];then echo True;else echo False;fi
+#  done
+# if [[ -n $disc ]];
+# then echo True;
+# else echo False;
+# fi
 
-if [ ! -f /dump/ripping ]
-then disc=$(lsdvd | grep Disc\ Title | cut -d ":" -f 2 | awk '{print $1}')
-if [[ -n $disc ]]
-then echo "Ripping ${disc} since $(date +%H:%M)" >> /dump/ripping
-mkdir -p /dump/${disc}
-lenghtitle=$(lsdvd | cut -d " " -f 4 | sort | tail -n 1)
-echo "Checking"
-title=$(lsdvd | sort | grep "${lenghtitle}" | cut -d " " -f 2 | sed 's/,//')
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+CDDVD=`cdir -vd /dev/sr0  2>&1 |grep -q "no_disc" || echo "cd"`
 
-if [[ $title < 10 ]]
-then echo "getting the title"
-track=$(echo $title | sed 's/0//')
-else track=$title
+if [ $CDDVD ];
+then ID_CDROM_MEDIA_CD=1
+ echo "CD detected" >> /dump/rip.log
+ abcde
+else
+ ID_CDROM_MEDIA_DVD=1
+ echo "DVD detected" >> /dump/rip.log
+
+	if [ ! -f /dump/ripping ]
+		then echo "Ripping" >> /dump/ripping
+		disc=$(lsdvd | grep Disc\ Title | cut -d ":" -f 2 | awk '{print $1}')
+			if [[ -n $disc ]]
+				then echo "Ripping ${disc} since $(date +%H:%M)" >> /dump/rip.log 
+				mkdir -p /dump/${disc}
+				lenghtitle=$(lsdvd | cut -d " " -f 4 | sort | tail -n 1)
+				echo "Checking"
+				title=$(lsdvd | sort | grep "Longest" | cut -d ":" -f 2 | awk '{print $1}')
+
+					if [[ $title < 10 ]]
+						then echo "getting the title"
+						track=$(echo $title | sed 's/0//')
+						else track=$title
+					fi
+
+					if [ -f "/dump/${disc}-${track}.vob" ]
+						then echo "Found file /dump/${disc}-${track}.vob"
+						else /usr/bin/mplayer dvd://${track} -dumpstream -dumpfile /dump/${disc}-${track}.vob -vo null -vc null -ao null
+					fi
+
+				
+				echo "Ripping is finished, you can eject the dvd. Starting the convertion at $(date  +%H:%M)" >> /dump/rip.log 
+				rm -f /dump/ripping
+				eject
+
+
+				mkdir -p "/dump/${disc}/converted"
+
+					for x in /dump/${disc}-${track}.vob
+						do echo "Checking before convert"
+							if [ -f "/dump/${disc}/converted/${disc}-${track}.mp4" ]
+								then echo "found  converted file to redo the convertion delete that file" >> /dump/rejected
+								else /usr/bin/HandBrakeCLI -i "/dump/${disc}-${track}.vob" -o "/dump/${disc}/converted/${disc}-${track}.mp4" -e x264  -q 20.0 -a 1,1 -E faac,copy:ac3 -B 160,160 -6 dpl2,none -R Auto,Auto -D 0.0,0.0 --audio-copy-mask aac,ac3,dtshd,dts,mp3 --audio-fallback ffac3 -f mp4 -4 --decomb --loose-anamorphic --modulus 2 -m --x264-preset medium --h264-profile high --h264-level 4.1 -s "1,2,3,4,5,6"
+								echo "Converting /dump/${disc}/converted/${disc}-${track}.vob" >> /dump/rip.log 
+								rm "/dump/${disc}-${track}.vob"
+							fi
+					done
+				rm /dump/rip.log 
+				else echo "No disc present"
+			fi
+		rm -f /dump/ripping	
+		else cat /dump/rip.log 
+	fi
 fi
-
-if [ -f "/dump/${disc}-${track}.vob" ]
-then echo "Found file /dump/${disc}-${track}.vob"
-else /usr/bin/mplayer dvd://${track} -dumpstream -dumpfile /dump/${disc}-${track}.vob -vo null -vc null -ao null
-fi
-
-
-echo "Ripping is finished, you can eject the dvd. Starting the convertion at $(date  +%H:%M)" >> /dump/ripping
-eject
-
-
-mkdir -p "/dump/${disc}/converted"
-
-for x in /dump/${disc}-${track}.vob
-do echo "Checking before convert"
-if [ -f "/dump/${disc}/converted/${disc}-${track}.mp4" ]
-then echo "found  converted file to redo the convertion delete that file" >> /dump/rejected
-else /usr/bin/HandBrakeCLI -i "/dump/${disc}-${track}.vob" -o "/dump/${disc}/converted/${disc}-${track}.mp4" -e x264  -q 20.0 -a 1,1 -E faac,copy:ac3 -B 160,160 -6 dpl2,none -R Auto,Auto -D 0.0,0.0 --audio-copy-mask aac,ac3,dtshd,dts,mp3 --audio-fallback ffac3 -f mp4 -4 --decomb --loose-anamorphic --modulus 2 -m --x264-preset medium --h264-profile high --h264-level 4.1 -s "1,2,3,4,5,6"
-echo "Converting /dump/${disc}/converted/${disc}-${track}.vob" >> /dump/ripping
-rm "/dump/${disc}-${track}.vob"
-fi
-done
-rm /dump/ripping
-else echo "No disc present"
-fi
-else cat /dump/ripping 
 fi
 
