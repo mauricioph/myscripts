@@ -1,9 +1,14 @@
 #!/bin/bash
+# Because of the circustances I created it on a Mac OS X system.
+# To adapt to Linux (My default SO) change the place variable and md5 to md5sum command.
+# Mauricio @ 2018
+
 place=/Users/mauricio/Movies
 quant=$(find ${place} -type f | wc -l)
 a=1
 find ${place} -type f >> /tmp/blockchain
 previous=Genesis
+
 while [ ${a} != ${quant} ]
 do hash=$(md5 -q "$(cat /tmp/blockchain | sed -n ${a}p)")
 data=$(echo "$(cat /tmp/blockchain | sed -n ${a}p)")
@@ -16,4 +21,5 @@ echo -e "\n" >> block.log
 let a=$(($a + 1))
 previous=$(echo ${hash})
 done
+
 echo "Done"
