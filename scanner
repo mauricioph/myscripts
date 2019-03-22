@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# This script will check a folder with photos and organise them by year which the photo as taken or created or edited.
+# whichever value is found in the metadata first
+#
 
 if [ -z ${1} ]
 then ext=jpg
