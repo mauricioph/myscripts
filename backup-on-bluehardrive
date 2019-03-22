@@ -1,0 +1,29 @@
+#!/bin/bash
+#
+# Backup by rsync on a specific blue hard drive.
+#
+
+hardriveuuid=ffe7a7b8-daf8-45bd-86b0-d3a57acb99ea
+device=$(blkid | grep ${hardriveuuid} | cut -d " " -f 1 | sed 's/\://' )
+pointmount=$(mount | grep "${device}" | cut -d " " -f 3)
+
+if [ -z ${pointmount} ]
+then echo "The hard drive is not mounted yet, mounting it now on /mnt"
+echo "Can I mount it here?"
+read mountnow
+case ${mountnow} in
+	y)
+	mount ${device} /mnt
+	;;
+	yes)
+	mount ${device} /mnt
+	;;
+	*)
+	echo "Write the mount point you would like to mount"
+	read customount
+	pointmount=${customount}
+	mount ${device} ${pointmount}
+	;;
+esac
+fi
+rsync -havz --exclude=/mnt --exclude=/dev/ --exclude=/tmp --exclude=/proc --exclude=/sys --delete / "${pointmount}"
