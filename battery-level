@@ -1,0 +1,54 @@
+#!/bin/bash
+# Check the battery level of the laptop.
+# it is useful for window managers like i3
+# Copyright (C) 2016 Mauricio Luis de Medeiros
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# License GPL v2
+# https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+sleep 30
+# This delay is to add time for all the programs load during boot time. (My case, you may remove it you like)
+
+# if [ $UID != 0 ]
+# then echo "Run as root"
+# gksu $0
+# fi
+
+statusquo=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep state | awk '{print $2}')
+
+while [ 1 ]
+	do statusquo=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep state | awk '{print $2}')
+	sleep 30
+		if [ $statusquo = "discharging" ]
+		then bl=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep percentage | cut -d ":" -f 2 | sed 's/ //g' | sed 's/%//g')
+		echo the battery is being monitored > /tmp/.bat.lock
+	
+		if [ "$bl" -lt "5" ]
+		then # shutdown -h 40
+		i3-nagbar -m "Shutting down in 20 seconds, battery level ${bl}%"
+		sleep 20
+		systemctl hibernate
+		fi
+			if [ "$bl" -lt "10" ]
+			then i3-nagbar -m "Battery level ${bl}%"
+			fi
+					if [ "$bl" -lt "20" ]
+					then i3-nagbar -t warning -m "Battery level ${bl}%"
+					fi
+		else if [ -f /tmp/.bat.lock ]
+			then shutdown -c "Aborting Shutdown"
+			rm /tmp/.bat.lock
+			fi
+		fi
+	done

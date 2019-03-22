@@ -1,0 +1,48 @@
+#!/bin/bash
+original="${1}"
+lab=$(mktemp -d /tmp/musica.XXXXXXXX)
+
+if [[ $original = ?*.* ]]; then
+	fileext=${original##*.}.$fileext
+fi
+
+fileext=${fileext%.}
+
+if [ "${fileext}" = "mp3" ]
+	then musicaflac=$(echo "${original}" | sed 's/\.mp3/\.flac/g')
+fi
+	if [ "${fileext}" = "m4a" ]
+		then musicaflac=$(echo "${original}" | sed 's/\.m4a/\.flac/g')
+	fi
+
+function flacme {
+ffmpeg -i "${original}" -c:a flac -y "${musicaflac}"
+}
+
+function arrancacapa {
+ffmpeg -i "${original}" -an -vcodec copy "${lab}/cover.jpg"
+convert "${lab}/cover.jpg" -resize 500x500 "${lab}/cover2.jpg"
+rm "${lab}/cover.jpg"
+mv "${lab}/cover2.jpg" "${lab}/cover.jpg"
+}
+
+function colacapa {
+flac "${musicaflac}" --picture="3|image/jpeg|||${lab}/cover.jpg" -f "${musicaflac}"
+mv "${lab}/cover.jpg" "${lab}/$(basename "${musicaflac}" | sed 's/\.flac/\.jpg/g')"
+}
+
+if [ "$2" = "-d" ]
+	then echo "Original ${original}"
+		echo "musicaflac ${musicaflac}"
+		echo "lab ${lab}"
+		echo "${lab}/${original} ${musicaflac}"
+		echo "resuming in 10"
+		sleep 5
+		echo "resuming in 5"
+		sleep 5 
+	fi
+flacme
+arrancacapa
+colacapa
+rm -f "${original}"
+rm -rf "${lab}"

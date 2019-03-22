@@ -1,0 +1,9 @@
+#!/bin/bash
+echo "Qual e o dia?"
+read ${dia};
+
+d1=$(echo ${dia} | cut -d "-" -f 1)
+m1=$(echo ${dia} | cut -d "-" -f 2)
+y1=$(echo ${dia} | cut -d "-" -f 3)
+date -d "${m1}-${d1}-${y1}" +%s
+

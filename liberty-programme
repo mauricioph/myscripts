@@ -1,0 +1,21 @@
+#!/bin/bash
+basefold="/home/mauricio/Podcasts/My Own/Done"
+destfold="/home/mauricio/Podcasts/My Own/to send"
+cd "${basefold}"
+
+function flac2wav(){
+echo "Ffmpeg it..."
+ffmpeg -i "${origflac}" -y "${flacwav}"
+}
+
+for i in *.flac
+do echo "Checking ${i}"
+origflac="${i}"
+flacwav="${destfold}/WOF-$(echo ${i} | sed 's/flac/wav/')"
+
+	if [ -f "${flacwav}" ]
+		then basename "${flacwav}" > "${flacwav}"
+		else flac2wav
+	fi
+done
+

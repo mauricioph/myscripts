@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [ -z ${1} ]
+then ext=jpg
+else ext=${1}
+fi
+
+
+
+for i in *.${ext};
+do echo "Searching..."
+nome=$(exiftool "${i}" -FileName | cut -d ":" -f 2 | awk '{printf $1}')
+year=$(exiftool "${i}" -DateTimeOriginal | cut -d ":" -f 2 | awk '{printf $1}');
+echo "Year1 = ${year}"
+
+if [ -z ${year} ]
+then year=$(exiftool "${i}" -CreateDate | cut -d ":" -f 2 | awk '{printf $1}')
+echo "Year2 = ${year}"
+fi
+
+if [ -z ${year} ]
+then year=$(exiftool "${i}" -FileModifyDate | cut -d ":" -f 2 | awk '{printf $1}')
+echo "Year3 = ${year}"
+origin=$(date -d @$(exiftool "${i}" -V | grep FileModifyDate | cut -d "=" -f 2 | awk '{printf $1}') "+%Y-%m-%d %H:%M:%S")
+exiftool "${i}" -CreateDate="${origin}" -DateTimeOriginal="${origin}"
+fi
+
+if [ ${year} == 0000 ]
+then year=$(exiftool "${i}" -FileModifyDate | cut -d ":" -f 2 | awk '{printf $1}')
+echo "Year4 = 0000 / ${year}"
+ origin=$(date -d @$(exiftool "${i}" -V | grep FileModifyDate | cut -d "=" -f 2 | awk '{printf $1}') "+%Y-%m-%d %H:%M:%S")
+ exiftool "${i}" -CreateDate="${origin}" -DateTimeOriginal="${origin}"
+fi
+
+echo -e "File = ${nome} \nCriado = ${year}";
+
+if [ ! -d ${year} ]
+then mkdir -p ${year}
+mv "${i}" "${year}"
+else mv "${i}" "${year}"
+fi
+
+done

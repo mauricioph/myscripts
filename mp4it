@@ -1,0 +1,12 @@
+#!/bin/bash
+entrada="${1}"
+arq=$(basename "${entrada}")
+ext="${arq##*.}"
+out="$(echo ${entrada} | sed "s/${ext}/mp4/g")"
+
+if [ ! -f ${out} ]
+then echo "MP4 not found, creating one"
+/usr/bin/ffmpeg -i "${entrada}" -c:v libx264 -crf 21 -b:v 4M -minrate 1M -maxrate 4M -bufsize 2M -c:a aac -strict -2 "${out}"
+else echo "MP4 found, convertions has started. After conversion delete the mp4 file if not closed properly"
+/usr/bin/ffmpeg -i "${entrada}" -c:v libx264 -crf 21 -b:v 4M -minrate 1M -maxrate 4M -bufsize 2M -c:a aac -strict -2 "${out}-converted.mp4"
+fi

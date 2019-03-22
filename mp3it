@@ -1,0 +1,28 @@
+#!/bin/bash
+convert=$(which ffmpeg)
+bitrate=$(expr 192)
+echo "Select the mount point of the player"
+dest=$(dialog --title "List file of directory" --fselect /media/mauricio 100 100)
+
+function md5it(){
+hashmd5=$(/usr/bin/md5sum "${file}" | awk '{print $1}')
+}
+
+function mudar(){
+${convert} -i "${file}" -c:a libmp3lame -b:a 192k -y "${dest}/${hashmd5}.mp3"
+}
+
+function bitcheck(){
+mdf=$(mediainfo "${file}" | grep "Bit rate" | grep kb | cut -d ":" -f 2 | awk '{print $1}');
+         if [ "${mdf}" != "192" ];
+                 then md5it
+                 mudar
+                 else echo "192kb";
+                 cp "${file}" "${dest}/${hashmd5}.mp3"
+         fi;
+
+}
+
+file="${1}"
+md5it
+mudar

@@ -1,0 +1,20 @@
+#!/bin/sh -e
+
+# i3 folder
+i3folder="$HOME/.config/i3/"
+# Icon
+icon="${i3folder}/icon.png"
+# Take a screenshot
+scrot ${i3folder}/screen_locked.png
+
+# Pixellate it 10x and write the enter the password phrase.
+convert -resize 10% ${i3folder}/screen_locked.png ${i3folder}/screen_locked2.png
+convert -resize 1000% ${i3folder}/screen_locked2.png ${i3folder}/screen_locked.png
+rm ${i3folder}/screen_locked2.png
+convert ${i3folder}/screen_locked.png -font Arial -pointsize 48 -draw "gravity South fill black  text 4,10 'Type the password to unlock' fill white  text 1,11 'Type the password to unlock' " "$icon" -gravity center -composite ${i3folder}/screen_locked.png
+
+# Lock screen displaying this image.
+i3lock -i ${i3folder}/screen_locked.png
+
+# Turn the screen off after a delay.
+sleep 60; pgrep i3lock && xset dpms force off

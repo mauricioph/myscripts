@@ -1,0 +1,3 @@
+#!/bin/bash
+du -ks $(ls -d */) | sort -nr | cut -f2 | xargs -d "\n" du -sh 2> /dev/null
+

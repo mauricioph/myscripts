@@ -1,0 +1,7 @@
+#!/bin/bash
+router=$(arp -a | grep 72:63:fe:35:b9:2a | cut -d " " -f 2)
+debianglass=$(arp -a | grep bc:ee:7b:8b:3a:33 | cut -d " " -f 2)
+debianrock=$(arp -a | grep 18:a9:05:16:e1:dd | cut -d " " -f 2)
+atvbox=$(arp -a  | grep 00:17:9a:20:3e:3a | cut -d " " -f 2)
+echo -e "My router is ${router}\nThe plex computer is ${debianglass}\nThe tv box is ${atvbox} \nand the document management is ${debianrock}"
+

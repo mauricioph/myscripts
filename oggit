@@ -1,0 +1,18 @@
+#!/bin/bash
+mkdir /tmp/mp3
+find $HOME/Music -type f -iname "*.mp3" -exec cp "{}" /tmp/mp3/ \;
+cd /tmp/mp3
+mkdir wav
+for i in *.mp3
+do mp3-decoder -w "wav/$(echo ${i} | sed 's/mp3/wav/')" "${i}"
+rm -f "${i}"
+done
+
+cd wav
+
+for x in *.wav
+do oggenc -b 192k "${x}"
+rm -f "${x}"
+done
+
+picard ./

@@ -1,0 +1,45 @@
+#!/bin/bash
+original="${1}"
+lab=$(mktemp -d /tmp/musica.XXXXXXXX)
+
+if [[ $original = ?*.* ]]; then
+	fileext=${original##*.}.$fileext
+fi
+
+fileext=${fileext%.}
+
+if [ "${fileext}" != "mp3" ]
+	then musicaflac=$(echo "${original}" | sed 's/'${fileext}'/mp3/g')
+else echo "This is a mp3 already"
+exit 1;
+fi
+
+function flacme {
+ffmpeg -i "${original}" -c:a libmp3lame -b:a 192k -y "${musicaflac}"
+}
+
+function arrancacapa {
+ffmpeg -i "${original}" -an -vcodec copy "${lab}/cover.jpg"
+}
+
+function colacapa {
+lame -b 192k --ti "${lab}/cover.jpg" "${musicaflac}"
+mv "${lab}/cover.jpg" "${lab}/$(basename "${musicaflac}" | sed 's/\.mp3/\.jpg/g')"
+}
+
+
+if [ "$2" = "-d" ]
+	then echo "Original ${original}"
+	echo "musicaflac ${musicaflac}"
+	echo "lab ${lab}"
+	echo "${lab}/${musicaflac}"
+	echo "resuming in 10"
+		sleep 5
+	echo "resuming in 5"
+		sleep 5 
+	fi
+flacme
+arrancacapa
+colacapa
+rm -f "${original}"
+rm -rf "${lab}"
