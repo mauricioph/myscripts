@@ -2,6 +2,10 @@
 #
 # Backup by rsync on a specific blue hard drive.
 #
+if [ $UID -ne 0 ]; then
+	echo "Please run this program as superuser"
+	exit 1
+fi
 
 hardriveuuid=ffe7a7b8-daf8-45bd-86b0-d3a57acb99ea
 device=$(blkid | grep ${hardriveuuid} | cut -d " " -f 1 | sed 's/\://' )
