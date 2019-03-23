@@ -30,4 +30,7 @@ case ${mountnow} in
 	;;
 esac
 fi
-rsync -havz --exclude=/mnt --exclude=/dev/ --exclude=/tmp --exclude=/proc --exclude=/sys --delete / "${pointmount}"
+echo "Mount point is ${pointmount}"
+echo "rsync -havz --exclude=/mnt --exclude=/dev/ --exclude=/tmp --exclude=/proc --exclude=/sys --delete / ${pointmount}"
+
+# For now the echoing rsync output is just temporary fix to avoid loss of data during tests.
