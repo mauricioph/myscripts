@@ -1,36 +1,30 @@
 #!/bin/bash
 #
-# Backup by rsync on a specific blue hard drive.
+# Backup by rsync on a specific hard drive.
+# If you want to edit change the UUID from the partition
+# where you want to back up and add below, to find the UUID
+# run blkid as superuser.
+# exemple of usage https://youtube.com/watch?v=dKkRgUIhn84
 #
-if [ $UID -ne 0 ]; then
-	echo "Please run this program as superuser"
-	exit 1
-fi
 
 hardriveuuid=ffe7a7b8-daf8-45bd-86b0-d3a57acb99ea
 device=$(blkid | grep ${hardriveuuid} | cut -d " " -f 1 | sed 's/\://' )
 pointmount=$(mount | grep "${device}" | cut -d " " -f 3)
 
+if [ -z ${device} ]
+then echo "The device is not connected, aborting backup. Please make sure it is plugged and the cable is working."
+exit 1
+fi
+
 if [ -z ${pointmount} ]
 then echo "The hard drive is not mounted yet, mounting it now on /mnt"
-echo "Can I mount it here?"
-read mountnow
-case ${mountnow} in
-	y)
+	location=$(mount | grep "/mnt" | cut -d " " -f 1)
+	if [ ! -z ${location} ]
+		then echo "########## ERROR ############"
+		echo "/mnt is mounted, but it is not your hard drive. umount it first"
+		exit 1
+		fi
 	mount ${device} /mnt
-	;;
-	yes)
-	mount ${device} /mnt
-	;;
-	*)
-	echo "Write the mount point you would like to mount"
-	read customount
-	pointmount=${customount}
-	mount ${device} ${pointmount}
-	;;
-esac
+	pointmount=/mnt
 fi
-echo "Mount point is ${pointmount}"
-echo "rsync -havz --exclude=/mnt --exclude=/dev/ --exclude=/tmp --exclude=/proc --exclude=/sys --delete / ${pointmount}"
-
-# For now the echoing rsync output is just temporary fix to avoid loss of data during tests.
+rsync -havz --exclude=/mnt --exclude=/dev/ --exclude=/tmp --exclude=/proc --exclude=/sys / ${pointmount}
