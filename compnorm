@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+# Script by Mauricio
+# This is going to look for mp3 files on a folder and 
+# apply Dynamic Compression to it. saving the before and after wave form on a png file
+
+function getwavb(){
+	ffmpeg -i "${audio}" -filter_complex ""aformat=channel_layouts=mono,showwavespic=s=1920x380"" -frames:v 1 "/tmp/compnorm/${a}.png"
+}
+
+function getwava(){
+	ffmpeg -i "${audio}" -filter_complex ""aformat=channel_layouts=mono,showwavespic=s=1920x380"" -frames:v 1 "/tmp/compnorm/$(basename "${audio}").png"
+}
+
+function getcompnorm(){
+	ffmpeg -i "${audio}" -filter_complex "compand=attacks=0:points=-80/-900|-45/-15|-27/-9|0/-7|20/-7:gain=5" -y "${tmpaudio}"
+}
+
+function prepaudio(){
+	if [ ! -d /tmp/compnorm ]
+		then mkdir -p /tmp/compnorm
+	fi
+audio="$(cat /tmp/lista | sed -n ${a}p)"
+tmpaudio=$(mktemp /tmp/compnorm/audio.XXXXXX.mp3)
+}
+
+function putaudio(){
+	mv "${tmpaudio}" "${audio}"
+}
+
+echo "Where are the files?"
+read loc
+find "${loc}" -type f -iname "*.mp3" > /tmp/lista
+a=$(cat /tmp/lista | wc -l)
+b=0
+
+while [ "${a}" != "${b}" ]
+	do prepaudio
+			getwavb
+			getcompnorm
+			putaudio
+      getwava
+			let a=$((${a} - 1))
+	done
