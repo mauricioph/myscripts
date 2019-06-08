@@ -82,5 +82,6 @@ while [ "${a}" != "${b}" ]
 	getwavb
 	getcompnorm
 	putaudio
+	getwava
 	let a=$((${a} - 1))
 	done
