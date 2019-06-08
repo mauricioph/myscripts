@@ -4,41 +4,83 @@
 # This is going to look for mp3 files on a folder and 
 # apply Dynamic Compression to it. saving the before and after wave form on a png file
 
+os="$(uname -s)"
+version="$(cat /etc/os-release | grep ^ID | cut -d "=" -f 2)"
+sudo="$(which sudo)"
+
+# Change this variable in case the system cannot find ffmpeg
+program="$(which ffmpeg)"
+
+# Do not change below this line, unless you know what you are doing.
+
+# Function to install ffmpeg in case it is not installed
+function install_ffmpeg(){
+if [ "${os}" == "Linux" ]
+then echo "Checking System"
+	if [ "${version}" = "debian" ]
+		then echo "Checking APT"
+			apting=$(which apt)
+				if [ -z "${apting}" ]
+					then echo "Method to install ffmpeg is not known. Can you install it and re-run the script?"
+					exit 1
+				else ${sudo} apt install ffmpeg
+				fi
+		else echo "This linux is not Debian based. Can you install ffmpeg using your package manager and re-run the script?"
+		exit 1
+		fi
+else echo -e "This is not a Linux system, can you install ffmpeg on your system and re-run the script?\nIn case it is a Windows and you know ffmpeg is installed change the program variable to where ffmpeg is installed"
+exit 1
+fi
+}
+
+# Get the wav image before the process
 function getwavb(){
-	ffmpeg -i "${audio}" -filter_complex ""aformat=channel_layouts=mono,showwavespic=s=1920x380"" -frames:v 1 "/tmp/compnorm/${a}.png"
+	ffmpeg -i "${audio}" -filter_complex ""aformat=channel_layouts=mono,showwavespic=s=1920x380"" -frames:v 1 -y "/tmp/compnorm/${a}-antes.png"
 }
 
+# Get the wav image after the process
 function getwava(){
-	ffmpeg -i "${audio}" -filter_complex ""aformat=channel_layouts=mono,showwavespic=s=1920x380"" -frames:v 1 "/tmp/compnorm/$(basename "${audio}").png"
+	ffmpeg -i "${audio}" -filter_complex ""aformat=channel_layouts=mono,showwavespic=s=1920x380"" -frames:v 1 -y "/tmp/compnorm/${a}-depois.png"
 }
 
+# Dynamic compress command
 function getcompnorm(){
-	ffmpeg -i "${audio}" -filter_complex "compand=attacks=0:points=-80/-900|-45/-15|-27/-9|0/-7|20/-7:gain=5" -y "${tmpaudio}"
+	ffmpeg -i "${audio}" -filter_complex "compand=attacks=0:points=-80/-900|-45/-15|-27/-9|0/-7|20/-7:gain=5" -y "${tmpaudio}.mp3"
 }
 
+# Prepare temporary files and folder
 function prepaudio(){
 	if [ ! -d /tmp/compnorm ]
 		then mkdir -p /tmp/compnorm
 	fi
 audio="$(cat /tmp/lista | sed -n ${a}p)"
-tmpaudio=$(mktemp /tmp/compnorm/audio.XXXXXX.mp3)
+tmpaudio=$(mktemp /tmp/compnorm/audio.XXXXXX)
 }
 
+# Save the logs and place the audio on its original location
 function putaudio(){
-	mv "${tmpaudio}" "${audio}"
+	mv "${tmpaudio}.mp3" "${audio}"
+	echo "${a} ---> ${audio}" > "${tmpaudio}"
 }
 
+# Get the location on where to search for files
 echo "Where are the files?"
 read loc
 find "${loc}" -type f -iname "*.mp3" > /tmp/lista
 a=$(cat /tmp/lista | wc -l)
 b=0
 
+# Check for ffmpeg and if do not find it call the function to install
+if [ -z "${program}" ]
+then echo "ffmpeg was not found on this system. I will try to install it."
+			install_ffmpeg
+fi
+
+# Call all the functions in a sequence until all the files in the folders are processed.
 while [ "${a}" != "${b}" ]
 	do prepaudio
 			getwavb
 			getcompnorm
 			putaudio
-      getwava
 			let a=$((${a} - 1))
 	done
