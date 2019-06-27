@@ -36,4 +36,4 @@ adicional=$(echo "${original}" | sed 's/\.'${extension}'//g')-mobile.mp4
 
 echo ${original}
 echo ${adicional}
-ffmpeg -i "${original}" -c:v libx264 -c:a aac -strict -2 -b:v 644k -b:a 96k -s 640x360 -preset:v ultrafast -profile:v main -t 01:44 -y "${adicional}"
+ffmpeg -i "${original}" -c:v libx264 -c:a aac -strict -2 -b:v 644k -b:a 96k -s 640x360 -preset:v ultrafast -profile:v main -y "${adicional}"
