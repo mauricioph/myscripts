@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# Tratamento do arquivo original
+# Treatment of the original file
+
 original="${1}"
 lab=$(mktemp -d /tmp/musica.XXXXXXXX)
 
@@ -8,6 +12,9 @@ fi
 
 fileext=${fileext%.}
 
+# Checar a extensao do arquivo e modificar o nome do arquivo final.
+# Check the file extension and modify the final file name.
+ 
 if [ "${fileext}" = "mp3" ]
 	then musicaflac=$(echo "${original}" | sed 's/\.mp3/\.flac/g')
 fi
@@ -15,10 +22,17 @@ fi
 		then musicaflac=$(echo "${original}" | sed 's/\.m4a/\.flac/g')
 	fi
 
+# Funcoes que vao executar as tarefas repetitivas 
+# Functions that will perform repetitive tasks
+
+# Funcao converte para flac
+# Function converts to flac
 function flacme {
 ffmpeg -i "${original}" -c:a flac -y "${musicaflac}"
 }
 
+# Funcao de tirar a capa do arquivo original
+# Function to remove the cover of the original file
 function arrancacapa {
 ffmpeg -i "${original}" -an -vcodec copy "${lab}/cover.jpg"
 convert "${lab}/cover.jpg" -resize 500x500 "${lab}/cover2.jpg"
@@ -26,11 +40,15 @@ rm "${lab}/cover.jpg"
 mv "${lab}/cover2.jpg" "${lab}/cover.jpg"
 }
 
+# Adicionar a capa "arrancada" no arquivo flac
+# Add the "ripped" cover on the flac file
 function colacapa {
 flac "${musicaflac}" --picture="3|image/jpeg|||${lab}/cover.jpg" -f "${musicaflac}"
 mv "${lab}/cover.jpg" "${lab}/$(basename "${musicaflac}" | sed 's/\.flac/\.jpg/g')"
 }
 
+# Caso o parametro -d e passado no comando, use esta funcao para mostrar as mensagens de debug
+# If the -d parameter is passed in the command, use this function to show the debug messages
 if [ "$2" = "-d" ]
 	then echo "Original ${original}"
 		echo "musicaflac ${musicaflac}"
@@ -41,6 +59,9 @@ if [ "$2" = "-d" ]
 		echo "resuming in 5"
 		sleep 5 
 	fi
+	
+# Hora de trabalhar executando as tarefas.
+# Time to work doing the tasks.
 flacme
 arrancacapa
 colacapa
