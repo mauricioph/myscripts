@@ -1,7 +1,7 @@
 import subprocess
 import random
 
-color = ['white', 'blue', 'red', 'green', 'orange']
+color = ['white', 'blue', 'red', 'green', 'orange', 'grey', 'pink', 'purple', 'yellow', 'brown']
 my_color = random.choice(color)
 print(my_color)
 
