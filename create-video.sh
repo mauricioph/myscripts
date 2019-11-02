@@ -5,6 +5,12 @@ array[0]="blue"
 array[1]="red"
 array[2]="white"
 array[3]="yellow"
+array[4]="green"
+array[5]="orange"
+array[6]="pink"
+array[7]="purple"
+array[8]="grey"
+
 
 size=${#array[@]}
 index=$(($RANDOM % $size))
