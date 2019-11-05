@@ -1,0 +1,26 @@
+#!/usr/bin/osascript
+
+tell application "iTunes"
+    activate
+    play playlist "Quinta"
+    set song repeat to all
+    set shuffle enabled to true
+    set the sound volume to 1
+end tell
+
+repeat with i from 1 to 50
+  set volume output volume 1 + i
+  delay 0.1
+end repeat
+
+tell application "iTunes"
+  set the sound volume to 10 -- set initial volume
+  set desiredVolume to 50 -- set to regular listening level
+  set interval to (0.7 * minutes) -- start to finish time
+  set waitTime to interval div desiredVolume -- spread out over interval time
+
+   repeat with X from 1 to desiredVolume
+    set the sound volume to X
+    delay waitTime
+    end repeat
+end tell
