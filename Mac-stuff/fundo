@@ -1,0 +1,11 @@
+#!/usr/bin/osascript
+
+tell application "iTunes"
+    activate
+    set song repeat to One
+    play track "This Majestic Land"
+end tell
+
+tell application "iTunes"
+    set song repeat to One
+end tell
