@@ -9,12 +9,14 @@ b=$(cat ${audio-file} | wc -l)
 a=0
 while [ "${a}" != "${b}" ]
  do ffmpeg -i "${audio-file}" -ss ${a} -t 10 -c copy -y /tmp/transcript-${a}.mp3
- cp /tmp/transcript-${a}.mp3 transcript.mp3
- python3 transcribe.py
+ cp /tmp/transcript-${a}.mp3 /tmp/transcript.mp3
+ python3 /usr/local/bin/transcribe.py
  let a=$(($a + 10))
 done
 
-leng=$(cat treino.txt | wc -l)
-for i in {1..297}
-do translate -d pt -s en "$(cat treino.txt | sed -n ${i}p)" >> traducao.txt
+leng=$(cat /tmp/treino.txt | wc -l)
+a=1
+while [ "${a}" != "${leng}" ]
+do translate -d pt -s en "$(cat /tmp/treino.txt | sed -n ${a}p)" >> /tmp/traducao.txt
+let a=$(($a + 1))
 done
