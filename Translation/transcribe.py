@@ -6,12 +6,12 @@ from os import path
 from pydub import AudioSegment
 
 # convert mp3 file to wav
-sound = AudioSegment.from_mp3("transcript.mp3")
-sound.export("transcript.wav", format="wav")
+sound = AudioSegment.from_mp3("/tmp/transcript.mp3")
+sound.export("/tmp/transcript.wav", format="wav")
 
 
 # transcribe audio file
-AUDIO_FILE = "transcript.wav"
+AUDIO_FILE = "/tmp/transcript.wav"
 
 # use the audio file as the audio source
 r = sr.Recognizer()
@@ -20,7 +20,7 @@ with sr.AudioFile(AUDIO_FILE) as source:
         print ("Transcription: " + r.recognize_google(audio))
 
 sublime="Transcription: " + r.recognize_google(audio)
-with open('treino.txt', 'a') as f:
+with open('/tmp/treino.txt', 'a') as f:
 	f.write(sublime)
 	f.write('\n')
 
