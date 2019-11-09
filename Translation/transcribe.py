@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# Dependencies pip install pydub SpeechRecognition
 
 import speech_recognition as sr
 from os import path
