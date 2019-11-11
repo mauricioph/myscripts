@@ -13,7 +13,7 @@ a=0
 while [ "${a}" -lt "${b}" ]
  do ffmpeg -i "${audiofile}" -ss ${a} -t 10 -c copy -y /tmp/transcript-${a}.mp3
  mv /tmp/transcript-${a}.mp3 /tmp/transcript.mp3
- echo "$a is A and $b is B"
+ echo "This is block $a of $b"
  echo "${audiofile} is audiofile"
  sleep 1
  python3 /usr/local/bin/transcribe.py
