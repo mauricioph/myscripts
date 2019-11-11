@@ -7,12 +7,15 @@ fi
 # and saved as transcript.mp3 on the /tmp folder, python script is called to write the words on a file
 
 audiofile="${1}"
-b=$(($(mp3info -p "%S" ${audiofile}) / 10))
+b=$(($(mp3info -p "%S" "${audiofile}") / 10))
 a=0
 
-while [ "${a}" != "${b}" ]
+while [ "${a}" -lt "${b}" ]
  do ffmpeg -i "${audiofile}" -ss ${a} -t 10 -c copy -y /tmp/transcript-${a}.mp3
  mv /tmp/transcript-${a}.mp3 /tmp/transcript.mp3
+ echo "$a is A and $b is B"
+ echo "${audiofile} is audiofile"
+ sleep 1
  python3 /usr/local/bin/transcribe.py
  let a=$(($a + 10))
 done
@@ -24,3 +27,8 @@ while [ ${a} != ${leng} ]
 do translate -d en -s pt "$(cat /tmp/BishopMacedo.txt | sed -n ${a}p)" >> traducao.txt
 let a=$(($a + 1))
 done
+
+# Clean up temporary folder changing the text files to the source directory 
+mv /tmp/BishopMacedo.txt "${audiofile}.txt"
+cat traducao.txt | sed '/\[en\]/!d' > "${audiofile}.english.txt"
+rm traducao.txt
