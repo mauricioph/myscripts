@@ -17,10 +17,9 @@ AUDIO_FILE = "/tmp/transcript.wav"
 r = sr.Recognizer()
 with sr.AudioFile(AUDIO_FILE) as source:
         audio = r.record(source)  # read the entire audio file
-        print ("Transcription: " + r.recognize_google(audio))
+        mensagem="Start: " + r.recognize_google(audio, language='pt-BR')
 
-sublime="Transcription: " + r.recognize_google(audio)
-with open('/tmp/treino.txt', 'a') as f:
-	f.write(sublime)
+# write file appending each line to it.	
+with open('/tmp/BishopMacedo.txt', 'a') as f:
+	f.write(mensagem)
 	f.write('\n')
-
