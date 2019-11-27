@@ -1,10 +1,20 @@
 #!/bin/bash
 entrada="${1}"
+
+if [[ -z "${entrada}" ]]
+	then echo "Usage $0 video.file"
+	echo "This script will convert whatever video file to x265 1080p 5.1 AC3 audio"
+	exit 1
+fi
+arq="$(basename "${entrada}")"
+ext="${arq##*.}"
+out="$(echo ${entrada} | sed "s/${ext}/mp4/g")"
+
 echo "Please wait. Getting ${entrada} digital signature"
-input=$(echo "${entrada}" | md5sum -t | awk '{print $1}').mp4
+input=$(echo "${entrada}" | md5sum -t | awk '{print $1}').${ext}
 output="${input}.h265.mp4"
 processor=$(cat /proc/cpuinfo | grep processor | wc -l)
-echo "${entrada} = $(echo ${input} | sed 's/\.mp4//g')"
+echo "${entrada} = $(echo ${input} | sed "s/\.${ext}//g")"
 echo "Copying to ${input}"
 
 cp "${entrada}" ${input}
@@ -30,5 +40,13 @@ case ${channels} in
 	*) ffmpeg -i "${input}" -pix_fmt yuv444p10le -s 1920x1080 -threads ${processor} -c:v libx265 -maxrate 7M -bufsize 14M -preset ultrafast -profile:v:0 main444-10 -level:v:0 4.1 -crf 23 -x265-params subme=0:me_range=4:rc_lookahead=30:me=dia:no_chroma_me:8x8dct=0:partitions=none -g:v:0 72 -keyint_min:v:0 72 -sc_threshold:v:0 0 -c:a ac3 -b:a 192k -ac 6 -map 0:v:0 -map 0:a -y "${output}"
 	;;
 esac
-rm "${input}"
-mv "${output}" "${entrada}"
+
+echo "Checking convertion"
+conver=$(ffprobe "${output}" 2>&1 | grep Stream | grep Audio | cut -d ":" -f 3 | awk '{print $1}')
+if [[ ! -z ${conver} ]]
+	then echo "Convertion successfull, cleaning up!"
+	rm "${input}"
+	mv "${output}" "${entrada}"
+else echo "Convertion failed, returning file to it's Original state"
+	rm "${output}"
+fi
