@@ -41,12 +41,47 @@ case ${channels} in
 	;;
 esac
 
-echo "Checking convertion"
-conver=$(ffprobe "${output}" 2>&1 | grep Stream | grep Audio | cut -d ":" -f 3 | awk '{print $1}')
-if [[ ! -z ${conver} ]]
-	then echo "Convertion successfull, cleaning up!"
+function worked(){
+	echo "Success !!"
 	rm "${input}"
-	mv "${output}" "${entrada}"
-else echo "Convertion failed, returning file to it's Original state"
+	if [ ${ext} != mp4 ]
+ 		then mv "${output}" "$(echo ${entrada} | sed "s/\.${ext}/\.mp4/g")"
+ 		rm "${entrada}"
+ 		else mv "${output}" "${entrada}"
+	fi
+}
+
+function nwork(){
 	rm "${output}"
+}
+
+
+echo "Checking convertion"
+audioc=$(ffprobe "${output}" 2>&1 | grep Stream | grep Audio | cut -d ":" -f 3 | awk '{print $1}')
+if [ ! -z "${audioc}" ]
+	then echo "Audio = OK"
+else echo "There is no Audio Track, the convertion failed."
+	nwork
+	echo "There is no Audio Track, the convertion failed." >> "${entrada}.log"
+	exit 1
 fi
+videoc=$(ffprobe "${output}" 2>&1 | grep Stream | grep Video | cut -d ":" -f 3 | awk '{print $1}')
+if [ ! -z "${videoc}" ]
+	then echo "Video = OK"
+else echo "There is no Video Track, the convertion failed."
+	nwork
+	echo "There is no Video Track, the convertion failed." >> "${entrada}.log"
+	exit 1
+fi
+
+timec=$(ffprobe "${output}" 2>&1 | grep Duration | cut -d " " -f 4 | cut -d "." -f 1)
+timed=$(ffprobe "${entrada}" 2>&1 | grep Duration | cut -d " " -f 4 | cut -d "." -f 1)
+if [ "${timed}" == "${timec}" ]
+	then echo "Duration = OK"
+else echo "The lengh of the video is not the same as the original, the convertion failed."
+	nwork
+	echo "The lengh of the video is not the same as the original, the convertion failed." >> "${entrada}.log"
+	exit 1
+fi
+
+worked
