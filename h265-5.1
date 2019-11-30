@@ -14,7 +14,7 @@ out="$(echo ${entrada} | sed "s/${ext}/mp4/g")"
 # Make a copy to preserve the original file
 echo "Please wait. Getting ${entrada} digital signature"
 input=/tmp/$(echo "${entrada}" | md5sum -t | awk '{print $1}').${ext}
-output="/tmp/${input}.h265.mp4"
+output="${input}.h265.mp4"
 processor=$(cat /proc/cpuinfo | grep processor | wc -l)
 echo "${entrada} = $(echo ${input} | sed "s/\.${ext}//g")"
 echo "Copying to ${input}"
@@ -30,22 +30,6 @@ function dts(){
 echo "Convertendo keeping DTS audio"
 ffmpeg -i "${input}" -pix_fmt yuv444p10le -s 1920x1080 -threads ${processor} -c:v libx265 -maxrate 7M -bufsize 14M -preset ultrafast -profile:v:0 main444-10 -level:v:0 4.1 -crf 23 -x265-params subme=0:me_range=4:rc_lookahead=30:me=dia:no_chroma_me:8x8dct=0:partitions=none -g:v:0 72 -keyint_min:v:0 72 -sc_threshold:v:0 0 -c:a copy -async 1 -y "${output}"
 }
-
-
-if [ "${audio}" = "DTS" ]
-then dts
-exit 1
-fi
-
-# Convertion from mono or stereo to 5.1 surround sound
-case ${channels} in
-	1) ffmpeg -i "${input}" -pix_fmt yuv444p10le -s 1920x1080 -threads ${processor} -c:v libx265 -maxrate 7M -bufsize 14M -preset ultrafast -profile:v:0 main444-10 -level:v:0 4.1 -crf 23 -x265-params subme=0:me_range=4:rc_lookahead=30:me=dia:no_chroma_me:8x8dct=0:partitions=none -g:v:0 72 -keyint_min:v:0 72 -sc_threshold:v:0 0 -c:a ac3 -b:a 192k -filter_complex "[0:a]join=inputs=1:channel_layout=5.1:map=0.0-FL|0.0-FR|0.0-FC|0.0-LFE|0.0-BL|0.0-BR[a]" -map 0:v:0 -map [a] -y "${output}"
-	;;
-	2) ffmpeg -i "${input}" -pix_fmt yuv444p10le -s 1920x1080 -threads ${processor} -c:v libx265 -maxrate 7M -bufsize 14M -preset ultrafast -profile:v:0 main444-10 -level:v:0 4.1 -crf 23 -x265-params subme=0:me_range=4:rc_lookahead=30:me=dia:no_chroma_me:8x8dct=0:partitions=none -g:v:0 72 -keyint_min:v:0 72 -sc_threshold:v:0 0 -c:a ac3 -b:a 192k  -filter_complex "[0:a]join=inputs=1:channel_layout=5.1:map=0.0-FL|0.0-FR|0.0-FC|0.0-LFE|0.0-BL|0.0-BR[a]" -map 0:v:0 -map [a] -y "${output}"
-	;;
-	*) ffmpeg -i "${input}" -pix_fmt yuv444p10le -s 1920x1080 -threads ${processor} -c:v libx265 -maxrate 7M -bufsize 14M -preset ultrafast -profile:v:0 main444-10 -level:v:0 4.1 -crf 23 -x265-params subme=0:me_range=4:rc_lookahead=30:me=dia:no_chroma_me:8x8dct=0:partitions=none -g:v:0 72 -keyint_min:v:0 72 -sc_threshold:v:0 0 -c:a ac3 -b:a 192k -ac 6 -map 0:v:0 -map 0:a -y "${output}"
-	;;
-esac
 
 # If it worked clean the rubbish
 function worked(){
@@ -64,7 +48,10 @@ function nwork(){
 	rm "${output}"
 }
 
-# Check the converted file to determine if the Audio and Video where successfully converted, taking also into consideration the length of the file to avoid errors of synchronization on the final file
+
+function scanoutput(){
+# Check the converted file to determine if the Audio and Video where successfully converted. 
+# Taking also into consideration the length of the file to avoid errors of synchronization on the final file
 echo "Checking convertion"
 audioc=$(ffprobe "${output}" 2>&1 | grep Stream | grep Audio | cut -d ":" -f 3 | awk '{print $1}')
 if [ ! -z "${audioc}" ]
@@ -92,5 +79,25 @@ else echo "The lengh of the video is not the same as the original, the convertio
 	echo "The lengh of the video is not the same as the original, the convertion failed." >> "${entrada}.log"
 	exit 1
 fi
-
 worked
+}
+
+# Convertion of a video with DTS audio
+if [ "${audio}" = "DTS" ]
+then dts
+scanoutput
+exit 1
+fi
+
+# Convertion from mono or stereo to 5.1 surround sound
+case ${channels} in
+	1) ffmpeg -i "${input}" -pix_fmt yuv444p10le -s 1920x1080 -threads ${processor} -c:v libx265 -maxrate 7M -bufsize 14M -preset ultrafast -profile:v:0 main444-10 -level:v:0 4.1 -crf 23 -x265-params subme=0:me_range=4:rc_lookahead=30:me=dia:no_chroma_me:8x8dct=0:partitions=none -g:v:0 72 -keyint_min:v:0 72 -sc_threshold:v:0 0 -c:a ac3 -b:a 192k -filter_complex "[0:a]join=inputs=1:channel_layout=5.1:map=0.0-FL|0.0-FR|0.0-FC|0.0-LFE|0.0-BL|0.0-BR[a]" -map 0:v:0 -map [a] -y "${output}"
+	scanoutput
+	;;
+	2) ffmpeg -i "${input}" -pix_fmt yuv444p10le -s 1920x1080 -threads ${processor} -c:v libx265 -maxrate 7M -bufsize 14M -preset ultrafast -profile:v:0 main444-10 -level:v:0 4.1 -crf 23 -x265-params subme=0:me_range=4:rc_lookahead=30:me=dia:no_chroma_me:8x8dct=0:partitions=none -g:v:0 72 -keyint_min:v:0 72 -sc_threshold:v:0 0 -c:a ac3 -b:a 192k  -filter_complex "[0:a]join=inputs=1:channel_layout=5.1:map=0.0-FL|0.0-FR|0.0-FC|0.0-LFE|0.0-BL|0.0-BR[a]" -map 0:v:0 -map [a] -y "${output}"
+	scanoutput
+	;;
+	*) ffmpeg -i "${input}" -pix_fmt yuv444p10le -s 1920x1080 -threads ${processor} -c:v libx265 -maxrate 7M -bufsize 14M -preset ultrafast -profile:v:0 main444-10 -level:v:0 4.1 -crf 23 -x265-params subme=0:me_range=4:rc_lookahead=30:me=dia:no_chroma_me:8x8dct=0:partitions=none -g:v:0 72 -keyint_min:v:0 72 -sc_threshold:v:0 0 -c:a ac3 -b:a 192k -ac 6 -map 0:v:0 -map 0:a -y "${output}"
+	scanoutput
+	;;
+esac
