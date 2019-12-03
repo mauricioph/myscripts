@@ -20,11 +20,6 @@
 sleep 30
 # This delay is to add time for all the programs load during boot time. (My case, you may remove it you like)
 
-# if [ $UID != 0 ]
-# then echo "Run as root"
-# gksu $0
-# fi
-
 statusquo=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep state | awk '{print $2}')
 
 while [ 1 ]
@@ -35,8 +30,7 @@ while [ 1 ]
 		echo the battery is being monitored > /tmp/.bat.lock
 	
 		if [ "$bl" -lt "5" ]
-		then # shutdown -h 40
-		i3-nagbar -m "Shutting down in 20 seconds, battery level ${bl}%"
+		then i3-nagbar -m "Shutting down in 20 seconds, battery level ${bl}%"
 		sleep 20
 		systemctl hibernate
 		fi
