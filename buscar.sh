@@ -1,4 +1,6 @@
 #!/bin/bash
+# This script check for the podcast of Bishop Macedo on soundcloud and download it to a specific folder.
+
 mes=$(date +%B)
 ans="/home/mauricio/Podcasts/My Own/pt/${mes}"
 
