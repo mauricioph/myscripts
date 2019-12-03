@@ -1,4 +1,7 @@
 #!/bin/bash
+# Create a video from an audio file, it will use an image as background and add the wave form animation based on the 
+# audio detection from ffmpeg.
+
 input="${1}"
 output="${input}.mp4"
 array[0]="blue"
