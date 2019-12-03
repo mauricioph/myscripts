@@ -1,5 +1,6 @@
 #!/bin/bash
-echo "Qual e o dia?"
+# Check the epoc time of any given date
+echo "What is the date?"
 read ${dia};
 
 d1=$(echo ${dia} | cut -d "-" -f 1)
