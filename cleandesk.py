@@ -58,7 +58,8 @@ class MyHandler(FileSystemEventHandler):
                     src = folder_to_track + "/" + filename
 
                     new_name = folder_destination_path + "/" + new_name
-                    os.rename(src, new_name)
+            # time.sleep(5)
+            os.rename(src, new_name)
                 # except Exception:
                 #     print(filename)
 extensions_folders = {
@@ -70,11 +71,15 @@ extensions_folders = {
     '.mid' : "/home/mauricio/Media/Audio",
     '.midi' : "/home/mauricio/Media/Audio",
     '.mp3' : "/home/mauricio/Media/Audio",
+    '.m4a' : "/home/mauricio/Media/Audio",
     '.mpa' : "/home/mauricio/Media/Audio",
     '.ogg' : "/home/mauricio/Media/Audio",
+    '.opus' : "/home/mauricio/Media/Audio",
+    '.flac' : "/home/mauricio/Media/Audio",
     '.wav' : "/home/mauricio/Media/Audio",
     '.wma' : "/home/mauricio/Media/Audio",
-    '.wpl' : "/home/mauricio/Media/Audio",
+    '.m4a' : "/home/mauricio/Media/Audio",
+    '.m3u8' : "/home/mauricio/Media/Audio/",
     '.m3u' : "/home/mauricio/Media/Audio",
 #Text
     '.txt' : "/home/mauricio/Text/TextFiles",
@@ -87,6 +92,12 @@ extensions_folders = {
     '.wks ': "/home/mauricio/Text/TextFiles",
     '.wps': "/home/mauricio/Text/TextFiles",
     '.wpd': "/home/mauricio/Text/TextFiles",
+#Books
+    '.epub' : "/home/mauricio/Text/Books/epub",
+    '.cbz' : "/home/mauricio/Text/Books/cbr",
+    '.cbr' : "/home/mauricio/Text/Books/cbz",
+    '.chm ' : "/home/mauricio/Text/Books/chm",
+    '.mobi': "/home/mauricio/Text/Books/mobi",
 #Video
     '.3g2': "/home/mauricio/Media/Video",
     '.3gp': "/home/mauricio/Media/Video",
@@ -139,15 +150,21 @@ extensions_folders = {
     '.pkg': "/home/mauricio/Other/Compressed",
     '.rar': "/home/mauricio/Other/Compressed",
     '.rpm': "/home/mauricio/Other/Compressed",
-    '.tar.gz': "/home/mauricio/Other/Compressed",
+    '.tgz': "/home/mauricio/Other/Compressed",
     '.z': "/home/mauricio/Other/Compressed",
     '.zip': "/home/mauricio/Other/Compressed",
+    '.tar' : "/home/mauricio/Other/Compressed",
+    '.gz' : "/home/mauricio/Other/Compressed",
+    '.bz2' : "/home/mauricio/Other/Compressed",
+    '.xz' : "/home/mauricio/Other/Compressed",
+    '.xpi' : "/home/mauricio/Other/Compressed",
 #Disc
     '.bin': "/home/mauricio/Other/Disc",
     '.dmg': "/home/mauricio/Other/Disc",
     '.iso': "/home/mauricio/Other/Disc",
     '.toast': "/home/mauricio/Other/Disc",
     '.vcd': "/home/mauricio/Other/Disc",
+    '.img' : "/home/mauricio/Other/Disc",
 #Data
     '.csv': "/home/mauricio/Programming/Database",
     '.dat': "/home/mauricio/Programming/Database",
@@ -160,6 +177,19 @@ extensions_folders = {
     '.tar': "/home/mauricio/Programming/Database",
     '.xml': "/home/mauricio/Programming/Database",
     '.json': "/home/mauricio/Programming/Database",
+    '.fmp12' : "/home/mauricio/Programming/Database",
+    '.sqlite3' : "/home/mauricio/Programming/Database",
+#Encripted
+    '.ssl':"/home/mauricio/Other/Encrypted",
+    '.crx':"/home/mauricio/Other/Encrypted",
+    '.csr':"/home/mauricio/Other/Encrypted",
+    '.pem':"/home/mauricio/Other/Encrypted",
+    '.key':"/home/mauricio/Other/Encrypted",
+    '.cert':"/home/mauricio/Other/Encrypted",
+    '.crt' : "/home/mauricio/Other/Encrypted",
+    '.64' : "/home/mauricio/Other/Encrypted",
+    '.pfx' : "/home/mauricio/Other/Encrypted",
+    '.pk12' : "/home/mauricio/Other/Encrypted",
 #Executables
     '.apk': "/home/mauricio/Other/Executables",
     '.bat': "/home/mauricio/Other/Executables",
@@ -168,6 +198,10 @@ extensions_folders = {
     '.gadget': "/home/mauricio/Other/Executables",
     '.jar': "/home/mauricio/Other/Executables",
     '.wsf': "/home/mauricio/Other/Executables",
+    '.run': "/home/mauricio/Other/Executables",
+    '.AppImage': "/home/mauricio/Other/Executables",
+    '.appimage' : "/home/mauricio/Other/Executables",
+    '.Appimage' : "/home/mauricio/Other/Executables",
 #Fonts
     '.fnt': "/home/mauricio/Other/Fonts",
     '.fon': "/home/mauricio/Other/Fonts",
@@ -209,6 +243,7 @@ extensions_folders = {
     '.msi' : "/home/mauricio/Text/Other/System",
     '.sys' : "/home/mauricio/Text/Other/System",
     '.tmp' : "/home/mauricio/Text/Other/System",
+    '.conf' : "/home/mauricio/Text/Other/System",
 }
 
 folder_to_track = '/home/mauricio/Downloads'
