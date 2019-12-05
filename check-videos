@@ -1,0 +1,15 @@
+#!/bin/bash
+echo "Where should I seach for mp4 videos? End the path with /"
+read fold
+
+for i in ${fold}*.mp4
+do mpv "${i}"
+echo "Devo apagar"
+read apa
+	case "$apa" in 
+		y) echo "Apagando $i"
+		;;
+		*) echo "Skipping"
+		;;
+	esac;
+done
