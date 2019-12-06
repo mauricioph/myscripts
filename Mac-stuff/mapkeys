@@ -1,4 +1,6 @@
 #!/bin/bash
+# Maps Keyboard keys swapping CONTROL and CAPSLOCK
+# and CAPSLOCK and RIGHT_SHIFT
 
 CAPS_LOCK="0x700000039"
 R_SHIFT="0x7000000E5"
