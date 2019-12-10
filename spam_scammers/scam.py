@@ -10,7 +10,7 @@ random.seed = (os.urandom(1024))
 
 url = 'http://craigslist.pottsfam.com/index872dijasydu2iuad27aysdu2yytaus6d2ajsdhasdasd2.php'
 
-providers = [ "gmail.com", "yahoo.com", "mail.com", "hotmail.com", "live.com", "icloud.com", "me.com"]
+providers = [ "gmail.com", "yahoo.com", "mail.com", "outlook.com", "gmx.com", "protomail.com", "aol.com", "hotmail.com", "live.com", "icloud.com", "me.com"]
 names = json.loads(open('names.json').read())
 
 for name in names:
