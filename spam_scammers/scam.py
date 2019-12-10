@@ -3,6 +3,7 @@ import os
 import random
 import string
 import json
+import time
 
 chars = string.ascii_letters + string.digits + '!@#$%^&*()'
 random.seed = (os.urandom(1024))
@@ -20,7 +21,9 @@ for name in names:
 	name_extra_fr = ''.join(random.choice(string.digits))
 	username = name.lower() + name_extra + name_extra_tw + name_extra_tr + name_extra_fr + '@' + random.choice(providers)
 	password = ''.join(random.choice(chars) for i in range(8))
-
+        
+	# add time to avoid the server to ban your ip because of abuse of posts
+	time.sleep(10)
 	requests.post(url, allow_redirects=False, data={
 		'auid2yjauysd2uasdasdasd': username,
 		'kjauysd6sAJSDhyui2yasd': password
