@@ -15,11 +15,8 @@ names = json.loads(open('names.json').read())
 
 for name in names:
 
-	name_extra = ''.join(random.choice(string.digits))
-	name_extra_tw = ''.join(random.choice(string.digits))
-	name_extra_tr = ''.join(random.choice(string.digits))
-	name_extra_fr = ''.join(random.choice(string.digits))
-	username = name.lower() + name_extra + name_extra_tw + name_extra_tr + name_extra_fr + '@' + random.choice(providers)
+	name_extra = ''.join(random.choice(string.digits) for i in range(4))
+	username = name.lower() + name_extra + '@' + random.choice(providers)
 	password = ''.join(random.choice(chars) for i in range(8))
         
 	# add time to avoid the server to ban your ip because of abuse of posts
