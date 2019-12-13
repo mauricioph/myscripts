@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Jezabel-S01x080.mp4
+# Getting series on this format Jezabel-S01x080.mp4 convert it to h265.
 import os
 import random
 import subprocess
