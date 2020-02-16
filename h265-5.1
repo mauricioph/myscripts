@@ -100,12 +100,12 @@ fi
 worked
 }
 
-if ((${largura}<=640))
-then resolucao="640x360"
-fi
-
 if ((${largura}<=1279))
 then resolucao="1280x720"
+fi
+
+if ((${largura}<=640))
+then resolucao="640x360"
 fi
 
 if ((${largura}>=1280)) 
