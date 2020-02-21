@@ -56,10 +56,12 @@ function worked(){
 # If it did not work, create a log with the error and clean the fragments preserving the original file for further investigation
 function nwork(){
 	echo "The convertion failed, you have 30 seconds to check before the files are deleted."
+	telegram-send --caption "Convertion of ${entrada} failed" --file "${entrada}.log"
 	sleep 30
 	echo "cleaning"
 	rm "${input}"
 	rm "${output}"
+	exit 1
 }
 
 
@@ -71,18 +73,16 @@ audioc=$(ffprobe "${output}" 2>&1 | grep Stream | grep Audio | cut -d ":" -f 3 |
 if [ ! -z "${audioc}" ]
 	then echo "Audio = OK"
 else echo "Audio = ERROR There is no Audio Track, the convertion failed."
-	nwork
 	echo "There is no Audio Track, the convertion failed." >> "${entrada}.log"
-	telegram-send --caption "Convertion failed" --file "${entrada}.log"
+	nwork
 	exit 1
 fi
 videoc=$(ffprobe "${output}" 2>&1 | grep Stream | grep Video | cut -d ":" -f 3 | awk '{print $1}')
 if [ ! -z "${videoc}" ]
 	then echo "Video = OK"
 else echo "Video = ERROR There is no Video Track, the convertion failed."
-	nwork
 	echo "There is no Video Track, the convertion failed." >> "${entrada}.log"
-	telegram-send --caption "Convertion failed" --file "${entrada}.log"
+	nwork
 	exit 1
 fi
 
@@ -92,9 +92,8 @@ if [ "${timed}" == "${timec}" ]
 	then echo "Duration = OK"
 else echo "Lenght = ERROR The lengh of the video is not the same as the original, the convertion failed."
 	echo "If you want to investigate the file you have 30 seconds to copy ${output} to another location"
-	nwork
 	echo "The lengh of the video is not the same as the original, the convertion failed." >> "${entrada}.log"
-	telegram-send --caption "Convertion failed" --file "${entrada}.log"
+	nwork
 	exit 1
 fi
 worked
