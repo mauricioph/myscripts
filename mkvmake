@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+#
+
+
+# Check if there is an argumment passing for a specific track, if not get the longest video.
+if [ -z ${1} ]
+then track=$(lsdvd | grep Longest | cut -d ":" -f 2 | awk '{print $1}')
+else track=${1}
+fi
+
+# Get the name of the disc and create a folder for the files
+disctitle=$(lsdvd | grep Disc | cut -d ":" -f 2 | awk '{print $1}')
+folder="${HOME}/Videos/${disctitle}"
+output="${folder}/title_t${track}.vob"
+if [ ! -d "${folder}" ]
+then mkdir -p "${folder}"
+fi
+
+# Dump the video, make an mkv and delete the vob
+mplayer dvd://${track} -vc null -vo null -dumpstream -dumpfile ${output}
+mkvmerge -o "$(echo ${output} | sed 's/\.vob/\.mkv/g')" --generate-chapters interval:300s "${output}"
+rm "${output}"
