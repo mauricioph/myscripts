@@ -1,7 +1,31 @@
 #!/bin/bash
 #
-#
+# Copyleft 2020 Maurice Medeiros
+# RIP DVD
+# Depend on mkvtoolnix, mplayer, libdvdcss2 and lsdvd
+# sudo apt-get install libdvdcss2 mplayer mkvtoolnix lsdvd
 
+# Check if the dependencies match if not try to install
+css=$(/sbin/ldconfig -p | grep libdvdcss | awk '{print $1}' | sed -n 1p)
+
+if [ -z ${css} ]
+then echo "You do not have libdvdcss installed, depending on the law of your country you may not be allowed to install"
+echo "If you are sure the laws of your country allows check https://www.videolan.org/developers/libdvdcss.html"
+exit 1
+fi
+
+for i in lsdvd mplayer mkvmerge;
+do a=$(which -a ${i})
+  if [ -z ${a} ]
+    then echo "You do not have ${a} installed, trying to install it now"
+    if [ -x $(which -a apt) ]
+     then sudo apt install "${i}"
+     else echo "Your system is not Debian based or do not have apt installed, try to install it through your distro pkg-manager"
+      exit 1
+    fi
+  fi
+unset a
+done
 
 # Check if there is an argumment passing for a specific track, if not get the longest video.
 if [ -z ${1} ]
