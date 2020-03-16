@@ -41,6 +41,10 @@ if [ ! -d "${folder}" ]
 then mkdir -p "${folder}"
 fi
 
+# This is a function under test, there might be a xml file in the folder with the chapters
+titulo=$(echo ${disctitle} | sed 's/ /%20/g' | sed 's/_/%20/g')
+chapter=$(wget $(echo "https://chapterdb.plex.tv$(curl https://chapterdb.plex.tv/browse?Criteria.Title=${titulo} | grep /browse/ | grep href | cut -d "\"" -f 2 | sed -n 1p).xml"))
+
 # Dump the video, make an mkv and delete the vob
 mplayer dvd://${track} -vc null -vo null -dumpstream -dumpfile ${output}
 mkvmerge -o "$(echo ${output} | sed 's/\.vob/\.mkv/g')" --generate-chapters interval:300s "${output}"
