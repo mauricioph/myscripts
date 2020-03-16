@@ -1,16 +1,18 @@
 #!/bin/bash
 #
-# Copyleft 2020 Maurice Medeiros
-# RIP DVD
-# Depend on mkvtoolnix, mplayer, libdvdcss2 and lsdvd
-# sudo apt-get install libdvdcss2 mplayer mkvtoolnix lsdvd
+# 2020 copyleft Maurice Medeiros
+#
+# This script is inspired on makemkv, but done in bash
+# Dependencies are lsdvd mplayer mkvtoolnix and libdvdcss
 
-# Check if the dependencies match if not try to install
+
+# Check if the dependencies match, if not try to install
 css=$(/sbin/ldconfig -p | grep libdvdcss | awk '{print $1}' | sed -n 1p)
 
 if [ -z ${css} ]
 then echo "You do not have libdvdcss installed, depending on the law of your country you may not be allowed to install"
 echo "If you are sure the laws of your country allows check https://www.videolan.org/developers/libdvdcss.html"
+echo "Install it as described on the website and re-run this script"
 exit 1
 fi
 
@@ -27,25 +29,55 @@ do a=$(which -a ${i})
 unset a
 done
 
-# Check if there is an argumment passing for a specific track, if not get the longest video.
+# Check if the track was passed as an argumment, if not it will get the longest track
 if [ -z ${1} ]
-then track=$(lsdvd | grep Longest | cut -d ":" -f 2 | awk '{print $1}')
-else track=${1}
+ then track=$(lsdvd | grep Longest | cut -d ":" -f 2 | awk '{print $1}')
+ else track=${1}
 fi
 
-# Get the name of the disc and create a folder for the files
+# Create the folder into Videos folder if it does not exit
 disctitle=$(lsdvd | grep Disc | cut -d ":" -f 2 | awk '{print $1}')
 folder="${HOME}/Videos/${disctitle}"
 output="${folder}/title_t${track}.vob"
+filename=$(echo "${disctitle}" | sed 's/ /_/g')
+finalfile=$(echo ${output} | sed 's/\.vob/\.mkv/g')
+
 if [ ! -d "${folder}" ]
-then mkdir -p "${folder}"
+ then mkdir -p "${folder}"
 fi
 
-# This is a function under test, there might be a xml file in the folder with the chapters
-titulo=$(echo ${disctitle} | sed 's/ /%20/g' | sed 's/_/%20/g')
-chapter=$(wget $(echo "https://chapterdb.plex.tv$(curl https://chapterdb.plex.tv/browse?Criteria.Title=${titulo} | grep /browse/ | grep href | cut -d "\"" -f 2 | sed -n 1p).xml"))
+# Extract the chapters from the DVD and save the file in te right format
+function chap(){
+i=1
+j2=01
+lsdvd -c 
 
-# Dump the video, make an mkv and delete the vob
-mplayer dvd://${track} -vc null -vo null -dumpstream -dumpfile ${output}
-mkvmerge -o "$(echo ${output} | sed 's/\.vob/\.mkv/g')" --generate-chapters interval:300s "${output}"
-rm "${output}"
+read -r -a CHAPTERS <<< $(mplayer -identify -frames 1 dvd://${track} 2>/dev/null | grep CHAPTERS: | sed 's/CHAPTERS: //' | sed 's/,/ /g')
+
+for chapter in "${CHAPTERS[@]}"
+do
+    echo "Chapter $i: $chapter"
+    let i++
+done
+
+for chapter in "${CHAPTERS[@]}"
+do
+    echo "CHAPTER${j2}=${chapter}" >> "${filename}.txt"
+    echo "CHAPTER${j2}NAME=Chapter $j2" >> "${filename}.txt"
+    j2=$(printf %02d $((10#$j2 + 1 )))
+
+done
+}
+
+# Do the ripping of the file in vob first and then add the chapters on the mkv file
+if [ ! -f "${output}" ]
+ then mplayer dvd://${track} -vc null -vo null -dumpstream -dumpfile "${output}"
+fi
+
+chap
+sleep 5
+mkvmerge -o "${finalfile}" --chapters "${filename}.txt" "${output}"
+if [ -f "${finalfile}" ]
+then rm "${output}"
+    rm "${filename}.txt"
+fi
