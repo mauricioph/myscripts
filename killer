@@ -11,7 +11,7 @@
 
 # Create variables
 input="${1}"
-output="/tmp/${RANDOM}
+output="/tmp/${RANDOM}"
 keyfile=/tmp/zfile
 
 # Check if the keyfile has been created
