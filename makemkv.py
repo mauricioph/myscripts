@@ -55,10 +55,11 @@ for i in  range(tot - 1):
 if not path.exists(output):
     subprocess.call("mplayer dvd://%s -vc null -dumpstream -dumpfile %s" %(track, output), shell=True)
 else:
-    print ("The output file %s already exists, delete it. Not overwritting" %(output))
+    print ("The output file %s already exists, please delete it. Not overwritting" %(output))
+    exit(1)
 
 if not path.exists(finalfile):
-    subprocess.call("mkvmerge -o "+finalfile+" --chapters /tmp/chapter.txt "+output, shell=True)
+    subprocess.call("mkvmerge -o %s --chapters /tmp/chapter.txt %s" %(finalfile, output), shell=True)
 
 # This should check if the previous if worked, do not merge as if and elif it will not work.
 # This if needs to run after the other if and not together.
