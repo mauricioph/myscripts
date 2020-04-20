@@ -58,5 +58,5 @@ with open('%s/info/%s.trashinfo' % (casa,arq), 'w') as f:
 
 
 # Move the file to the trash
-shutil.move(locfile, casa+"/files/"+filename)
+shutil.move(locfile, casa+"/files/"+arq)
 
