@@ -20,45 +20,45 @@ I am going to make a summary from time to time of what I add to this repository,
 1.	cleandesk.py *Clean Download folder allocating each file in there folder*, this arrange the files from Downloads to other places, I need to clean this code though... it is not helping with the clotting of files.
 1.	compnorm *Normalise audio from video*, without the need of opening an application, adding the effect, exporting and all these hustle.
 1.	create-video.sh *Create a video with an sound wave effect*, this is to make the podcast episodes for youtube as video with an annination of sound waves.
-	crypton 	Add files via upload 	4 years ago
-	dvd.sh 	Update dvd.sh 	5 months ago
-	epoc 	Update epoc 	5 months ago
-	failed-login.sh 	Update failed-login.sh 	5 months ago
-	ffmpeg.py 	Update ffmpeg.py 	6 months ago
-	flac-convert 	Update flac-convert 	9 months ago
-	get-net 	Add files via upload 	13 months ago
-	grab-screencast 	Add files via upload 	13 months ago
-	guest 	Add files via upload 	13 months ago
-	h265-5.1 	Update h265-5.1 	2 months ago
-	imgtxt 	Update imgtxt 	5 months ago
-	install-nextcloud.sh 	Create install-nextcloud.sh 	2 months ago
-	jesus.sh 	Add files via upload 	13 months ago
-	keyboard-backlight 	Add files via upload 	13 months ago
-	killer 	Update killer 	23 days ago
-	liberty-programme 	Add files via upload 	13 months ago
-	lightdm-background 	Add files via upload 	13 months ago
-	list 	Complete change 	3 years ago
-	lock-fusy.sh 	Update lock-fusy.sh 	10 months ago
-	lock-fuzzy 	Add files via upload 	13 months ago
-	login-screeshot 	Add files via upload 	13 months ago
-	logk 	Add files via upload 	13 months ago
-	lsfs 	Add files via upload 	13 months ago
-	lsix 	Add files via upload 	13 months ago
-	macosvncssh 	Update macosvncssh 	4 years ago
-	makemkv.py 	Update makemkv.py 	21 days ago
-	mkkrk 	Update mkkrk 	4 years ago
-	mkvmake 	Update mkvmake 	last month
-	mobile-phone-video 	Update mobile-phone-video 	10 months ago
-	mp3-convert 	Add files via upload 	13 months ago
-	mp3it 	Add files via upload 	13 months ago
-	mp4it 	Add files via upload 	13 months ago
-	oggit 	Add files via upload 	13 months ago
-	password_manager.py 	Update password_manager.py 	5 months ago
-	recorder 	Update recorder 	4 years ago
-	scanner 	Update scanner 	13 months ago
-	screen-backlight 	Add files via upload 	8 months ago
-	select-wall 	Update select-wall 	4 years ago
-	serie.sh 	Update serie.sh 	5 months ago
-	series.py 	Update series.py 	5 months ago
-	sss 	Update sss 	5 months ago
-	trash.py
+1.	crypton *Encrypt/Decrypt files* using openssl.
+1.	dvd.sh *Create a DVD from any video*, I used this to burn CCTV footages that are usually on mp4 to DVD 
+1.	epoc 
+1.	failed-login.sh
+1.	ffmpeg.py
+1.	flac-convert
+1.	get-net
+1.	grab-screencast
+1.	guest
+1.	h265-5.1
+1.	imgtxt
+1.	install-nextcloud.sh
+1.	jesus.sh
+1.	keyboard-backlight
+1.	killer
+1.	liberty-programme
+1.	lightdm-background
+1.	list
+1.	lock-fusy.sh
+1.	lock-fuzzy
+1.	login-screeshot
+1.	logk
+1.	lsfs
+1.	lsix
+1.	macosvncssh
+1.	makemkv.py
+1.	mkkrk
+1.	mkvmake
+1.	mobile-phone-video
+1.	mp3-convert
+1.	mp3it
+1.	mp4it
+1.	oggit
+1.	password_manager.py
+1.	recorder
+1.	scanner
+1.	screen-backlight
+1.	select-wall
+1.	serie.sh
+1.	series.py
+1.	sss
+1.	trash.py
