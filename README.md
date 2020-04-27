@@ -16,10 +16,10 @@ I am going to make a summary from time to time of what I add to this repository,
 1.	battery-level *Check battery level*, I use i3wm and this script is responsible for power management.
 1.	blockchain.sh *Just a study of blockchain theory*
 1.	buscar.sh *Automatically download podcast episode*, Translation of a radio programme, remember I said... so this are the episodes being automatically downloaded... you didn't expect I would click to download one by one, right?
-1.  check-videos 	*I don't remember...*
-	cleandesk.py 	Update cleandesk.py 	5 months ago
-	compnorm 	Update compnorm 	11 months ago
-	create-video.sh 	Update create-video.sh 	2 months ago
+1.  check-videos *Select which video to delete or keep in a folder*, sometimes just reading the file name is not enough we want to play the video... This script does that, it play the video and when I quit the player it wants me to decide what to do keep or delete.
+1.	cleandesk.py *Clean Download folder allocating each file in there folder*, this arrange the files from Downloads to other places, I need to clean this code though... it is not helping with the clotting of files.
+1.	compnorm *Normalise audio from video*, without the need of opening an application, adding the effect, exporting and all these hustle.
+1.	create-video.sh *Create a video with an sound wave effect*, this is to make the podcast episodes for youtube as video with an annination of sound waves.
 	crypton 	Add files via upload 	4 years ago
 	dvd.sh 	Update dvd.sh 	5 months ago
 	epoc 	Update epoc 	5 months ago
