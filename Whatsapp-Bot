@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+
+from selenium import webdriver
+import time
+
+class WhatsappBot:
+    def __init__(self):
+        # Part 1 - Name or groups you want to send the message
+        self.groups_or_people = ["Name as in  Whatsapp","Can be people or groups"]
+        options = webdriver.ChromeOptions()
+        # To send messages in different languages
+        # options.add_argument('lang=pt-br')
+        self.driver = webdriver.Chrome(
+        # Location of the executable
+        executable_path=r'/usr/local/bin/chromedriver', chrome_options=options)
+        self.driver.get('https://web.whatsapp.com')
+        time.sleep(30)
+        for people_or_group in self.groups_or_people:
+            group_field = self.driver.find_element_by_xpath(
+                f"//span[@title='{people_or_group}']")
+            time.sleep(3)
+            group_field.click()
+
+
+    def PostMsg(self):
+        # Part 2 - The message you want to send
+        msgcomp = ["01", "02", "03", "04", "05"]
+        self.textmsg = "This is my test number %s" %(msgcomp[x])
+        chat_box = self.driver.find_element_by_class_name('_1Plpp')
+        time.sleep(3)
+        chat_box.click()
+        chat_box.send_keys(self.textmsg)
+        send_button = self.driver.find_element_by_xpath("//span[@data-icon='send']")
+        time.sleep(3)
+        send_button.click()
+        time.sleep(5)
+
+bot = WhatsappBot()
+# The loop should be the amount of times the message will be sent.
+for x in range(5):
+    bot.PostMsg()
