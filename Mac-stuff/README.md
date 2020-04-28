@@ -1,5 +1,5 @@
-These files are all to work together, there is one goal here, which is the following:
-* Everyday before services iTunes will turn on and select the playlist of the day and will play it 30 minutes before each meeting.
+These files are all to work together, I use it on my work and there are some goals here, which are the following:
+* Everyday before a meeting iTunes will turn on and select the playlist of the day and will play it 30 minutes before each meeting.
 * When there is 1 minute left to start the meeting, the songs will stop and an instrumental song will start to intruduce the time of the meeting.
 * When the meeting starts iTunes should stop playing.
 
