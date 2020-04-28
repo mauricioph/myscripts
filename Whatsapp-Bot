@@ -10,14 +10,13 @@ class WhatsappBot:
         options = webdriver.ChromeOptions()
         # To send messages in different languages
         # options.add_argument('lang=pt-br')
-        self.driver = webdriver.Chrome(
+        
         # Location of the executable
-        executable_path=r'/usr/local/bin/chromedriver', chrome_options=options)
+        self.driver = webdriver.Chrome(executable_path=r'/usr/local/bin/chromedriver', chrome_options=options)
         self.driver.get('https://web.whatsapp.com')
         time.sleep(30)
         for people_or_group in self.groups_or_people:
-            group_field = self.driver.find_element_by_xpath(
-                f"//span[@title='{people_or_group}']")
+            group_field = self.driver.find_element_by_xpath(f"//span[@title='{people_or_group}']")
             time.sleep(3)
             group_field.click()
 
