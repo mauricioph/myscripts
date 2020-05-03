@@ -16,13 +16,21 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # License GPL v2
 # https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-wallpid=$(ps axo pid,cmd | grep select-wall | grep -v grep | awk '{print $1}')
-kill -9 $(echo $wallpid | sed 's/\$\$/g')
-find ~/Pictures/Wallpaper -type f -iname "*.jpg" -exec echo "{}" >> /tmp/.wall \;
+function commandwpp(){
+[[ ! -z "WAYLAND_DISPLAY" ]] && swaymsg Output LVDS-1 bg "${wallpaper}" stretch || feh --bg-scale "${wallpaper}"
+}
+
+wallpid=$(ps axo pid,cmd | grep select-wall | grep -v grep | awk '{print $1}' | xargs | sed '/$$/!d')
+for i in ${wallpid};
+do kill -9 "${i}";
+done
+
+find /usr/share/backgrounds/ -type f -iname "*.jpg" -exec echo "{}" >> /tmp/.wall \;
+
 while [ 1 ]
 do echo selecting
 a=$(shuf -i 1-$(cat /tmp/.wall | wc -l) -n 1)
 wallpaper=$(cat /tmp/.wall | sed -n ${a}p)
-feh --bg-scale "$wallpaper"
-sleep 300
+commandwpp
+sleep 120
 done
