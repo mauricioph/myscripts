@@ -19,6 +19,7 @@
 
 sleep 30
 # This delay is to add time for all the programs load during boot time. (My case, you may remove it you like)
+# /sys/class/power_supply/BAT0/status,capacity replace upower in the next edit.
 
 statusquo=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep state | awk '{print $2}')
 
