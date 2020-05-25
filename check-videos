@@ -1,6 +1,4 @@
 #!/bin/bash
-# Check a folder for mp4 files and play them, after playback confirm if it should be deleted or not.
-
 echo "Where should I seach for mp4 videos? End the path with /"
 read fold
 
@@ -10,9 +8,22 @@ echo "Devo apagar"
 read apa
 	case "$apa" in 
 		y) echo "Apagando $i"
-		rm -f "${i}"
+		rm "${i}"
 		;;
-		*) echo "Keepping ${i}"
+		*) echo "Skipping"
 		;;
 	esac;
+done
+
+for x in ${fold}*.mkv
+do mpv "${x}"
+echo "Devo apagar"
+read apa
+        case "$apa" in
+                y) echo "Apagando $x"
+                rm "${x}"
+                ;;
+                *) echo "Skipping"
+                ;;
+        esac;
 done
