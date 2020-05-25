@@ -1,6 +1,4 @@
 #!/bin/bash
-# This script check for the podcast of Bishop Macedo on soundcloud and download it to a specific folder.
-
 mes=$(date +%B)
 ans="/home/mauricio/Podcasts/My Own/pt/${mes}"
 
@@ -50,8 +48,8 @@ function linkage(){
 	saida=$( echo "${ans}/${orig}-${dest}.mp3" | sed 's/\ .mp3/\.mp3/')
 		if [ -f "${saida}" ]
 			then echo "File ${saida} is ready"
-			telegram-send "File ${saida} is ready"
-			else youtube-dl "${i}" -o "${saida}"
+			notify-send "File ${saida} is ready"
+			else youtube-dl --external-downloader /usr/bin/ffmpeg --verbose "${i}" -o "${saida}" >> /tmp/buscar.log
 		fi
 		sleep 3;
 		clear
@@ -64,3 +62,4 @@ function linkage(){
 	done
 }
 linkage
+
