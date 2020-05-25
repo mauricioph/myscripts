@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-# Organize the Home folder by getting the files in the Download folder and send it to the folder based on 
-# the file type, file extention and date of download.
-
 from watchdog.observers import Observer
 import time
 from watchdog.events import FileSystemEventHandler
@@ -65,6 +62,7 @@ class MyHandler(FileSystemEventHandler):
 extensions_folders = {
 #No name
     'noname' : "/home/mauricio/Other/Uncategorized",
+    '.part' : "",
 #Audio
     '.aif' : "/home/mauricio/Media/Audio",
     '.cda' : "/home/mauricio/Media/Audio",
