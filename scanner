@@ -1,10 +1,12 @@
 #!/bin/bash
 
+# Check if there is an extension on the argumments
 if [ -z ${1} ]
 then ext=jpg
 else ext=${1}
 fi
 
+# Search for the files in the folder and create folder structure separating as Year/Camera make/Model/ and move the files there
 for i in *.${ext};
     do echo "Searching..."
     nome=$(exiftool "${i}" -FileName | cut -d ":" -f 2 | sed 's/ /_/g' | sed 's/^_//')
