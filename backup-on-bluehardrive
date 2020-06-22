@@ -12,7 +12,7 @@ then echo "Best use this as root"
 exit 1
 fi
 
-hardriveuuid=73a6cb48-6cf9-4990-b0de-5172f09954b6
+hardriveuuid=2ea8b5cd-95e3-42fb-a326-5e7d268fb581
 device=$(blkid | grep ${hardriveuuid} | cut -d " " -f 1 | sed 's/\://' | sed -n 1p)
 pointmount=$(mount | grep "${device}" | cut -d " " -f 3)
 
