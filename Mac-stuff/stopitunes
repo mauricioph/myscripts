@@ -1,0 +1,8 @@
+#!/usr/bin/osascript
+if application "iTunes" is running then
+	try
+		tell application id "com.apple.iTunes"
+		quit
+		end tell
+	end try
+end if

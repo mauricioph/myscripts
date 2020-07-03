@@ -1,0 +1,9 @@
+#!/bin/bash
+# Maps Keyboard keys swapping CONTROL and CAPSLOCK
+# and CAPSLOCK and RIGHT_SHIFT
+
+CAPS_LOCK="0x700000039"
+R_SHIFT="0x7000000E5"
+L_CONTROL="0x7000000E0"
+
+hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":'${CAPS_LOCK}',"HIDKeyboardModifierMappingDst":'${L_CONTROL}'},{"HIDKeyboardModifierMappingSrc":'${R_SHIFT}',"HIDKeyboardModifierMappingDst":'${CAPS_LOCK}'}]}'

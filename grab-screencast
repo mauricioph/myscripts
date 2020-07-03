@@ -7,4 +7,4 @@ ssz=$(xrandr -q --current | grep '*' | awk '{print$1}')
 audiodskt=$(pactl list sources short | awk '{print$2}' | grep 'monitor')
 
 echo "Getting a ${ssz} screen on audio from ${audiodskt}"
-ffmpeg -f pulse -i ${audiodskt} -ac 2 -acodec vorbis -f x11grab -r 30 -s ${ssz} -i :0.0 -vcodec libx264 screencast-$(date +%s).mkv
+ffmpeg -f pulse -i "${audiodskt}" -c:a vorbis -f x11grab -r 30 -s "${ssz}" -i :0.0 -c:v libx264 screencast-$(date +%s).mkv

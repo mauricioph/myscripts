@@ -7,8 +7,13 @@
 # exemple of usage https://youtube.com/watch?v=dKkRgUIhn84
 #
 
-hardriveuuid=ffe7a7b8-daf8-45bd-86b0-d3a57acb99ea
-device=$(blkid | grep ${hardriveuuid} | cut -d " " -f 1 | sed 's/\://' )
+if [ $UID != 0 ]
+then echo "Best use this as root"
+exit 1
+fi
+
+hardriveuuid=2ea8b5cd-95e3-42fb-a326-5e7d268fb581
+device=$(blkid | grep ${hardriveuuid} | cut -d " " -f 1 | sed 's/\://' | sed -n 1p)
 pointmount=$(mount | grep "${device}" | cut -d " " -f 3)
 
 if [ -z ${device} ]
@@ -27,4 +32,42 @@ then echo "The hard drive is not mounted yet, mounting it now on /mnt"
 	mount ${device} /mnt
 	pointmount=/mnt
 fi
-rsync -havz --exclude=/mnt --exclude=/dev/ --exclude=/tmp --exclude=/proc --exclude=/sys / ${pointmount}
+
+umount /recover
+
+echo "We are going to use rsync to copy from / to ${pointmount} is it OK?"
+read confirma
+case ${confirma} in
+	y)
+	rsync -havz --delete --exclude=/media --exclude=/mnt --exclude=/dev/ --exclude=/tmp --exclude=/proc --exclude=/sys / ${pointmount}
+	;;
+	yes)
+	rsync -havz --delete --exclude=/media --exclude=/mnt --exclude=/dev/ --exclude=/tmp --exclude=/proc --exclude=/sys / ${pointmount}
+	;;
+	*)
+	echo Aborting
+	;;
+esac
+
+mount /recover
+
+echo "Backup done, do you want to umount the usb?"
+read usboff
+
+case ${usboff} in
+	y)
+        echo "USB Summary"
+	df -h /mnt
+	sudo umount /mnt
+	;;
+	yes)
+	echo "USB Summary"
+	df -h /mnt
+	sudo umount /mnt
+	;;
+	*)
+	echo "USB Summary"
+	df -h /mnt
+	echo "Remember to umount before taking it off"
+	;;
+esac

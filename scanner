@@ -1,47 +1,74 @@
 #!/bin/bash
-#
-# This script will check a folder with photos and organise them by year which the photo as taken or created or edited.
-# whichever value is found in the metadata first
-#
 
+# Check if there is an extension on the argumments
 if [ -z ${1} ]
 then ext=jpg
 else ext=${1}
 fi
 
-
-
+# Search for the files in the folder and create folder structure separating as Year/Camera make/Model/ and move the files there
 for i in *.${ext};
-do echo "Searching..."
-nome=$(exiftool "${i}" -FileName | cut -d ":" -f 2 | awk '{printf $1}')
-year=$(exiftool "${i}" -DateTimeOriginal | cut -d ":" -f 2 | awk '{printf $1}');
-echo "Year1 = ${year}"
+    do echo "Searching..."
+    nome=$(exiftool "${i}" -FileName | cut -d ":" -f 2 | sed 's/ /_/g' | sed 's/^_//')
+    year=$(exiftool "${i}" -DateTimeOriginal | cut -d ":" -f 2 | awk '{printf $1}');
+    maker=$(exiftool "${i}" -Make | cut -d ":" -f 2 | sed 's/ /_/g' | sed 's/^_//')
+    creatortool=$(exiftool "${i}"  -CreatorTool | cut -d ":" -f 2 | sed 's/^ //')
+    model=$(exiftool "${i}" -Model | cut -d ":" -f 2 | sed 's/ /_/g' | sed 's/^_//')
+
+        if [ -z ${year} ]
+        then year=$(exiftool "${i}" -CreateDate | cut -d ":" -f 2 | awk '{printf $1}')
+        echo "Year2 = ${year}"
+        fi
 
 if [ -z ${year} ]
-then year=$(exiftool "${i}" -CreateDate | cut -d ":" -f 2 | awk '{printf $1}')
-echo "Year2 = ${year}"
-fi
-
-if [ -z ${year} ]
-then year=$(exiftool "${i}" -FileModifyDate | cut -d ":" -f 2 | awk '{printf $1}')
-echo "Year3 = ${year}"
-origin=$(date -d @$(exiftool "${i}" -V | grep FileModifyDate | cut -d "=" -f 2 | awk '{printf $1}') "+%Y-%m-%d %H:%M:%S")
-exiftool "${i}" -CreateDate="${origin}" -DateTimeOriginal="${origin}"
+    then year=$(exiftool "${i}" -FileModifyDate | cut -d ":" -f 2 | awk '{printf $1}')
+    echo "Year3 = ${year}"
+    origin=$(date -d @$(exiftool "${i}" -V | grep FileModifyDate | cut -d "=" -f 2 | awk '{printf $1}') "+%Y-%m-%d %H:%M:%S")
+    exiftool "${i}" -CreateDate="${origin}" -DateTimeOriginal="${origin}"
 fi
 
 if [ ${year} == 0000 ]
-then year=$(exiftool "${i}" -FileModifyDate | cut -d ":" -f 2 | awk '{printf $1}')
-echo "Year4 = 0000 / ${year}"
- origin=$(date -d @$(exiftool "${i}" -V | grep FileModifyDate | cut -d "=" -f 2 | awk '{printf $1}') "+%Y-%m-%d %H:%M:%S")
- exiftool "${i}" -CreateDate="${origin}" -DateTimeOriginal="${origin}"
+    then year=$(exiftool "${i}" -FileModifyDate | cut -d ":" -f 2 | awk '{printf $1}')
+    echo "Year4 = 0000 / ${year}"
+    origin=$(date -d @$(exiftool "${i}" -V | grep FileModifyDate | cut -d "=" -f 2 | awk '{printf $1}') "+%Y-%m-%d %H:%M:%S")
+    exiftool "${i}" -CreateDate="${origin}" -DateTimeOriginal="${origin}"
 fi
+
+function mmc(){
+    # is there a maker?
+if [ ! -z "${maker}" ]
+    then namefl="${year}/${maker}"
+     if [ ! -d "${year}/${maker}" ]
+      then mkdir -p "${year}/${maker}"
+     fi 
+    else namefl="${year}/${creatortool}-"
+fi
+
+    # is there a model?
+if [ ! -z "${model}" ]
+  then echo "${namefl}/${model}"
+     if [ ! -d "${namefl}/${model}" ]
+      then mkdir -p "${namefl}/${model}"
+     fi
+  namefl="${namefl}/${model}/"
+
+fi
+    # What to do if there is no?
+nom="$(echo ${namefl}${nome} | sed 's/ /_/g' | sed 's:\/-:\/:g')"
+
+echo "${nom}"
+
+}
 
 echo -e "File = ${nome} \nCriado = ${year}";
 
 if [ ! -d ${year} ]
-then mkdir -p ${year}
-mv "${i}" "${year}"
-else mv "${i}" "${year}"
+    then mkdir -p ${year}
+    mmc 
+    mv "${i}" "${nom}"
+else mmc
+    mv "${i}" "${nom}"
 fi
 
+# end of the for loop
 done

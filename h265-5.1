@@ -1,0 +1,161 @@
+#!/bin/bash
+entrada="${1}"
+videocodec=$(ffprobe -show_data -show_streams -print_format json -v quiet "${entrada}" | grep codec_name | cut -d ":" -f 2 | awk '{print $1}' | sed 's/\"//g' | sed 's/,//g' | sed -n 1p)
+arq="$(basename "${entrada}")"
+ext="${arq##*.}"
+out="$(echo ${entrada} | sed "s/${ext}/mp4/g")"
+largura=$(ffprobe "${entrada}" -show_format -show_streams -print_format json -v quiet | grep width | sed -n 1p | cut -d ":" -f 2 | sed 's/,//g' | awk '{print $1}')
+
+# Check if there is an input file and split the file name from the extension.
+if [[ -z "${entrada}" ]]
+	then echo "Usage $0 video.file"
+	echo "This script will convert whatever video file to x265 1080p 5.1 AC3 audio"
+	echo "If the video is already in h265, but the audio is not 5.1 use the cv argumment"
+	echo "$0 video.file cv"
+	exit 1
+fi
+
+
+# Check if the video codec is hevc. If it is then check if the cv argumment was passed on to convert it again.
+function videocheck(){
+if [[ $videocodec == "hevc" ]]
+	then echo "This video is already on h265 format, not doing the convertion. If you want to convert run again with a second argument cv"
+	exit 1
+fi
+}
+
+if [[ -z "${2}" ]]
+	then videocheck
+fi
+
+# Make a copy to preserve the original file
+echo "Please wait. Getting ${entrada} digital signature"
+input=/tmp/$(echo "${entrada}" | md5sum -t | awk '{print $1}').${ext}
+output="${input}.h265.mp4"
+processor=$(cat /proc/cpuinfo | grep processor | wc -l)
+echo "${entrada} = $(echo ${input} | sed "s/\.${ext}//g")"
+echo "Copying to ${input}"
+
+cp "${entrada}" ${input}
+
+# Check the type of audio and analize which convertion method to use for the audio tracks
+audio=$(mediainfo "${input}" | grep Format | grep DTS | cut -d ":" -f 2 | awk '{print $1}')
+channels=$(mediainfo "${input}" | grep channel | cut -d ":" -f 2 | awk '{print $1}')
+
+# If it worked clean the rubbish
+function worked(){
+	echo "Success !!"
+	rm "${input}"
+	if [ ${ext} != mp4 ]
+ 		then mv "${output}" "$(echo ${entrada} | sed "s/\.${ext}/\.mp4/g")"
+ 		rm "${entrada}"
+ 		else mv "${output}" "${entrada}"
+	fi
+}
+
+# If it did not work, create a log with the error and clean the fragments preserving the original file for further investigation
+function nwork(){
+	echo "The convertion failed, you have 30 seconds to check before the files are deleted."
+	telegram-send --caption "Convertion of ${entrada} failed" --file "${entrada}.log"
+	sleep 30
+	echo "cleaning"
+	rm "${input}"
+	rm "${output}"
+	exit 1
+}
+
+
+function scanoutput(){
+# Check the converted file to determine if the Audio and Video where successfully converted. 
+# Taking also into consideration the length of the file to avoid errors of synchronization on the final file
+echo "Checking convertion"
+audioc=$(ffprobe "${output}" 2>&1 | grep Stream | grep Audio | cut -d ":" -f 3 | awk '{print $1}')
+if [ ! -z "${audioc}" ]
+	then echo "Audio = OK"
+else echo "Audio = ERROR There is no Audio Track, the convertion failed."
+	echo "There is no Audio Track, the convertion failed." >> "${entrada}.log"
+	nwork
+	exit 1
+fi
+videoc=$(ffprobe "${output}" 2>&1 | grep Stream | grep Video | cut -d ":" -f 3 | awk '{print $1}')
+if [ ! -z "${videoc}" ]
+	then echo "Video = OK"
+else echo "Video = ERROR There is no Video Track, the convertion failed."
+	echo "There is no Video Track, the convertion failed." >> "${entrada}.log"
+	nwork
+	exit 1
+fi
+
+timec=$(ffprobe "${output}" 2>&1 | grep Duration | cut -d " " -f 4 | cut -d "." -f 1)
+timed=$(ffprobe "${entrada}" 2>&1 | grep Duration | cut -d " " -f 4 | cut -d "." -f 1)
+if [ "${timed}" == "${timec}" ]
+	then echo "Duration = OK"
+else echo "Lenght = ERROR The lengh of the video is not the same as the original, the convertion failed."
+	echo "If you want to investigate the file you have 30 seconds to copy ${output} to another location"
+	echo "The lengh of the video is not the same as the original, the convertion failed." >> "${entrada}.log"
+	nwork
+	exit 1
+fi
+worked
+}
+
+if ((${largura}<=1279))
+then resolucao="1280x720"
+fi
+
+if ((${largura}<=640))
+then resolucao="640x360"
+fi
+
+if ((${largura}>=1280)) 
+then resolucao="1920x1080"
+fi
+
+function database(){
+echo "Writting in the database"
+videoin="${entrada}"
+origwid="${largura}"
+newresolution="${resolucao}"
+audiochannels="${channels}"
+vcodec="${videocodec}"
+nvcodec="hevc"
+naudioc="6"
+
+# Check if the database exits if not create it and enter the data
+if [ ! -f videos.db ]
+	then sqlite3 videos.db 'CREATE TABLE "convertions" ("id" INTEGER PRIMARY KEY AUTOINCREMENT,"file" TEXT,"originalwidth" INTEGER,"newresolution" TEXT,"audiochannels" TEXT,"videocodec" TEXT,"nvcodec" TEXT,"naudioc" INTERGER);'
+fi
+echo "I am going to run" sqlite3 videos.db "insert into convertions (file,originalwidth,newresolution,audiochannels,videocodec,nvcodec,naudioc) values (\"$videoin\",\"$origwid\",\"$newresolution\",\"$audiochannels\",\"$vcodec\",\"$nvcodec\",\"$naudioc\");"
+sqlite3 videos.db "insert into convertions (file,originalwidth,newresolution,audiochannels,videocodec,nvcodec,naudioc) values (\"$videoin\",\"$origwid\",\"$newresolution\",\"$audiochannels\",\"$vcodec\",\"$nvcodec\",\"$naudioc\");"
+}
+
+# Preserve uncompressed DTS sound
+function dts(){
+echo "Convertendo keeping DTS audio"
+ffmpeg -i "${input}" -pix_fmt yuv444p10le -s ${resolucao} -threads ${processor} -c:v libx265 -maxrate 7M -bufsize 14M -preset ultrafast -profile:v:0 main444-10 -level:v:0 4.1 -crf 23 -x265-params subme=0:me_range=4:rc_lookahead=30:me=dia:no_chroma_me:8x8dct=0:partitions=none -g:v:0 72 -keyint_min:v:0 72 -sc_threshold:v:0 0 -c:a copy -async 1 -y "${output}"
+}
+
+
+# Convertion of a video with DTS audio
+if [ "${audio}" = "DTS" ]
+then dts
+scanoutput
+database
+exit 1
+fi
+
+# Convertion from mono or stereo to 5.1 surround sound
+case ${channels} in
+	1) ffmpeg -i "${input}" -pix_fmt yuv444p10le -s ${resolucao} -threads ${processor} -c:v libx265 -maxrate 7M -bufsize 14M -preset ultrafast -profile:v:0 main444-10 -level:v:0 4.1 -crf 23 -x265-params subme=0:me_range=4:rc_lookahead=30:me=dia:no_chroma_me:8x8dct=0:partitions=none -g:v:0 72 -keyint_min:v:0 72 -sc_threshold:v:0 0 -c:a ac3 -b:a 192k -filter_complex "[0:a]join=inputs=1:channel_layout=5.1:map=0.0-FL|0.0-FR|0.0-FC|0.0-LFE|0.0-BL|0.0-BR[a]" -map 0:v:0 -map [a] -y "${output}"
+	scanoutput
+	database
+	;;
+	2) ffmpeg -i "${input}" -pix_fmt yuv444p10le -s ${resolucao} -threads ${processor} -c:v libx265 -maxrate 7M -bufsize 14M -preset ultrafast -profile:v:0 main444-10 -level:v:0 4.1 -crf 23 -x265-params subme=0:me_range=4:rc_lookahead=30:me=dia:no_chroma_me:8x8dct=0:partitions=none -g:v:0 72 -keyint_min:v:0 72 -sc_threshold:v:0 0 -c:a ac3 -b:a 192k  -filter_complex "[0:a]join=inputs=1:channel_layout=5.1:map=0.0-FL|0.0-FR|0.0-FC|0.0-LFE|0.0-BL|0.0-BR[a]" -map 0:v:0 -map [a] -y "${output}"
+	scanoutput
+	database
+	;;
+	*) ffmpeg -i "${input}" -pix_fmt yuv444p10le -s ${resolucao} -threads ${processor} -c:v libx265 -maxrate 7M -bufsize 14M -preset ultrafast -profile:v:0 main444-10 -level:v:0 4.1 -crf 23 -x265-params subme=0:me_range=4:rc_lookahead=30:me=dia:no_chroma_me:8x8dct=0:partitions=none -g:v:0 72 -keyint_min:v:0 72 -sc_threshold:v:0 0 -c:a ac3 -b:a 192k -ac 6 -map 0:v:0 -map 0:a -y "${output}"
+	scanoutput
+	database
+	;;
+esac
