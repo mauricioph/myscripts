@@ -1,0 +1,35 @@
+#!/bin/bash
+#Encrypted Blu-Ray player setup for Debian
+#Allows encrypted blu-rays to be played in VLC and XBMC
+#Written by Quidsup, adapted by Mauricioph
+
+echo "Encrypted Blu-Ray player setup for VLC and XBMC"
+echo "Installing VLC and libbluray packages"
+sleep 5
+sudo apt update
+sudo apt -y -m install vlc libaacs0 libbluray-bdj libbluray1
+
+echo "Creating AACS folder under ~/.config"
+[[ ! -d ~/.config/aacs ]] && mkdir -p ~/.config/aacs/
+cd ~/.config/aacs/
+
+echo "Downloading KEYSDB.cfg"
+[[ ! -f ~/.config/aacs/KEYDB.cfg ]] && wget http://vlc-bluray.whoknowsmy.name/files/KEYDB.cfg || echo "You already have the KEYDB.cfg file, you should make a backup"
+
+if [ -f ~/.config/aacs/KEYDB.cfg ]
+then echo "Successfully downloaded KEYSDB.cfg"
+else echo "Failed to download KEYSDB.cfg"
+     echo "Attempting to download from mirror site"
+     wget http://vlc-aacs.whoknowsmy.name/files/KEYDB.cfg
+
+  if [ -f ~/.config/aacs/KEYDB.cfg ]
+	then echo "Successfully downloaded KEYSDB.cfg from mirror site"
+  else echo
+    echo "Unable to download KEYSDB.cfg"
+    echo "Try looking on Google for an alternate copy of KEYSDB.cfg"
+    exit
+  fi
+fi
+
+echo
+echo "Encrypted Blu-Ray player setup Script complete"
