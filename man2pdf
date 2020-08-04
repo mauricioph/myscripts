@@ -1,0 +1,15 @@
+#!/bin/bash
+
+pgm=${1}
+
+function usage(){
+echo -e "To export the man page of a program to pdf you will need to enter the name of the program you want to have the manual:\n$0 program_name"
+}
+[[ -z ${pgm} ]] && usage && exit
+
+pdfpgm=$(which ps2pdf | awk '{print $1}')
+
+[[ -z ${pdfpgm} ]] && sudo apt update && sudo apt install ps2pdf
+
+[[ ! -z ${pgm} ]] && man -t "${pgm}" > "${pgm}.ps" && ps2pdf "${pgm}.ps" && rm -f "${pgm}.ps"
+
