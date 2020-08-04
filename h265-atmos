@@ -56,8 +56,8 @@ function worked(){
 # If it did not work, create a log with the error and clean the fragments preserving the original file for further investigation
 function nwork(){
 	echo "The convertion failed, you have 30 seconds to check before the files are deleted."
-        telegram-send --caption "The convertion of $(basename ${entrada}) failed" --file "${entrada}.log"
-	sleep 30
+    # telegram-send --caption "The convertion of $(basename ${entrada}) failed" --file "${entrada}.log"
+    sleep 30
 	echo "cleaning"
 	rm "${input}"
 	rm "${output}"
@@ -88,15 +88,19 @@ else echo "Video = ERROR There is no Video Track, the convertion failed."
 	exit 1
 fi
 
+function guardar(){
+cp "${output}" "${entrada}_timed_wrong.mp4"
+}
+
 timec=$(ffprobe "${output}" 2>&1 | grep Duration | cut -d " " -f 4 | cut -d "." -f 1)
 timed=$(ffprobe "${entrada}" 2>&1 | grep Duration | cut -d " " -f 4 | cut -d "." -f 1)
 if [ "${timed}" == "${timec}" ]
 	then echo "Duration = OK"
 else echo "Lenght = ERROR The lengh of the video is ${timec} but the original is ${timed}, the convertion failed."
-	echo "If you want to investigate the file you have 30 seconds to copy ${output} to another location"
-	echo "Convertion of $(basename ${entrada}) failed, the lenght ${timec} converted and ${timed} original." >> "${entrada}.log"
-	telegram-send --caption "Convertion of $(basename ${entrada}) failed, the lenght ${timec} converted and ${timed} original." --file "${entrada}.log"
-	sleep 60
+	echo "Since the problem is related to time and I do not know what happened, check "${entrada}"_timed_wrong.mp4"
+	echo "Convertion of $(basename "${entrada}") failed, the lenght ${timec} converted and ${timed} original.\n Check "${entrada}"_timed_wrong.mp4" >> "${entrada}.log"
+	telegram-send --caption "Convertion of $(basename "${entrada}") failed, the lenght ${timec} converted and ${timed} original. Check the copy on the original's folder" --file "${entrada}.log"
+	guardar
 	nwork
 	exit 1
 fi
