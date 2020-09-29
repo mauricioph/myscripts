@@ -1,0 +1,7 @@
+#!/bin/bash
+[ $USER != root ] && echo "Please run as root" && exit 1
+
+x=$(dpkg --list | grep -i linux-image | grep ^rc| awk '{ print $2}')
+
+[ -z ${x} ] && echo "There is only the current kernel available, It's all good."
+[ ! -z "${x}" ] &&  echo "removing ${x}" && apt --purge remove ${x}
