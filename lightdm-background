@@ -6,9 +6,6 @@
 
 
 new=$(find /usr/share/backgrounds | shuf | sed -n 1p)
-#cat /etc/lightdm/lightdm-gtk-greeter.conf | sed '/^background =/d' > /etc/lightdm/lightdm-gtk-greeter.conf
-#echo "background = ${new}" >> /etc/lightdm/lightdm-gtk-greeter.conf
-
 cat > /etc/lightdm/lightdm-gtk-greeter.conf <<EOF
 [greeter]
 background = ${new}
