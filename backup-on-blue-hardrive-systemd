@@ -47,10 +47,10 @@ wall << EOF
 Backup has started
 EOF
 
-rsync -havz --delete --exclude=/media --exclude=/mnt --exclude=/dev/ --exclude=/tmp --exclude=/proc --exclude=/sys / ${pointmount}
+rsync -havz --delete --exclude={/media/*,/mnt/*,/dev/*,/tmp/*,/proc/*,/sys/*,/home/mauricio/.local/Trash/*,/home/mauricio/.cache/*} / ${pointmount}
 mount /recovery
 df -h /mnt
-umount /mnt
+umount ${device}
 
 wall << EOF
 Backup complete
