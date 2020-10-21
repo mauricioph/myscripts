@@ -14,6 +14,8 @@
 set -e
 set -o pipefail
 
+[ ! -f /sys/class/leds/smc::bkd_backlight/brightness ] && echo "Keyboard light not found, please check if you hardware supports keyboard backlight" && exit 1
+
 BACKLIGHT=$(cat /sys/class/leds/smc::kbd_backlight/brightness)
 INCREMENT=15
 
