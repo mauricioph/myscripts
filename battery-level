@@ -21,21 +21,21 @@ sleep 30
 # This delay is to add time for all the programs load during boot time. (My case, you may remove it you like)
 
 while [ 1 ]
-	do statusquo=$(cat /sys/class/power_supply/BAT0/status | awk '{print $1}')
+	do statusquo=$(cat /sys/class/power_supply/BAT1/status | awk '{print $1}')
 	sleep 30
 		if [ $statusquo = "Discharging" ]
-		then bl=$(cat /sys/class/power_supply/BAT0/capacity | awk '{print $1}')
+		then bl=$(cat /sys/class/power_supply/BAT1/capacity | awk '{print $1}')
 		echo "The battery is being monitored ${bl}%" > /tmp/.bat.log
 		if [ "$bl" -lt "5" ]
-		then notify-send "Shutting down in 20 seconds, battery level ${bl}%"
+		then notify-send -h string:bgcolor:#990000 "Shutting down in 20 seconds, battery level ${bl}%"
 		sleep 20
 		systemctl hibernate
 		fi
 			if [ "$bl" -lt "10" ]
-			then i3-nagbar -m "Battery level ${bl}%"
+			then notify-send -h string:bgcolor:#C37306 "Battery level ${bl}%"
 			fi
 					if [ "$bl" -lt "20" ]
-					then notify-send "Battery level ${bl}%"
+					then notify-send -h string:bgcolor:#50248D "Battery level ${bl}%"
 					fi
 		else if [ -f /tmp/.bat.lock ]
 			then echo "Aborting hibernation, battery is being charged"
