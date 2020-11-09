@@ -1,0 +1,20 @@
+#!/bin/bash
+entrada="${1}"
+
+# make sure there is a place for orfans files
+[ ! -d "Unknown" ] && mkdir -p "Unknown"
+
+# Sort artist and album
+Artista="$(exiftool "${entrada}" | grep "^Artist " | cut -d ":" -f 2 | sed 's/^\ //' | sed -n 1p | tr -dc '[:alnum:]\n\r\ \-\_')"
+Album="$(exiftool "${entrada}" | grep "^Album " | cut -d ":" -f 2 | sed 's/^\ //' | sed -n 1p | tr -dc '[:alnum:]\n\r\ \-\_')"
+
+# Move unknown files to Unknown folder
+[ -z "${Artista}" ] && echo "Artista not found in ${entrada}" && mv "${entrada}" Unknown/ && exit 1
+[ -z "${Album}" ] && echo "Album not found in ${entrada}" && mv "${entrada}" Unknown/ && exit 1
+
+# Make place if Artist or album folder does not exist
+[ ! -d "${Artista}" ] && mkdir "${Artista}"
+[ ! -d "${Artista}/${Album}" ] && mkdir "${Artista}/${Album}"
+
+# Move files to their folders
+[ -d "${Artista}/${Album}" ] && mv "${entrada}" "${Artista}/${Album}/" || echo "Artist and Album information found, but something is wrong. Not able to create a folder. Check the permissions for ${USER} on this folder"
