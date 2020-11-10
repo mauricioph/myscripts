@@ -1,6 +1,13 @@
 #!/bin/bash
+# Script to organise audio files based on their 
+# Artist and Album 
+#
 entrada="${1}"
+exiftool="$(which exiftool)"
+[ -z "${entrada}" ] && echo "Usage: ${0} file" && exit 1
+[ -z "${exiftool}" ] && echo "Dependency not found, please install exiftool" && exit 1
 
+ 
 # make sure there is a place for orfans files
 [ ! -d "Unknown" ] && mkdir -p "Unknown"
 
