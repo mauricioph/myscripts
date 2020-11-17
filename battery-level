@@ -1,7 +1,7 @@
 #!/bin/bash
 # Check the battery level of the laptop.
-# it is useful for window managers like i3
-# Copyright (C) 2016-2020 Mauricio Luis de Medeiros
+# it is useful for window managers like i3, dwm, tc
+# Copyleft (C) 2016-2020 Mauricio Luis de Medeiros
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -21,22 +21,21 @@ sleep 30
 # This delay is to add time for all the programs load during boot time. (My case, you may remove it you like)
 
 while [ 1 ]
-	do statusquo=$(cat /sys/class/power_supply/BAT1/status | awk '{print $1}')
+	do for b in  /sys/class/power_supply/BAT*/status;do statusquo=$(cat "${b}");done
 	sleep 30
 		if [ $statusquo = "Discharging" ]
-		then bl=$(cat /sys/class/power_supply/BAT1/capacity | awk '{print $1}')
-		echo "The battery is being monitored ${bl}%" > /tmp/.bat.log
-		if [ "$bl" -lt "5" ]
-		then notify-send -h string:bgcolor:#990000 "Shutting down in 20 seconds, battery level ${bl}%"
-		sleep 20
-		systemctl hibernate
-		fi
-			if [ "$bl" -lt "10" ]
-			then notify-send -h string:bgcolor:#C37306 "Battery level ${bl}%"
+			then bl=$(cat /sys/class/power_supply/BAT1/capacity | awk '{print $1}')
+			echo "The battery is being monitored ${bl}%" > /tmp/.bat.log
+			if [ "$bl" -lt "5" ]
+				then notify-send -h string:bgcolor:#990000 -h string:fgcolor:#FFFFFF "Shutting down in 20 seconds, battery level ${bl}%" -i battery -u critical
+				sleep 20
+				systemctl hibernate
 			fi
-					if [ "$bl" -lt "20" ]
-					then notify-send -h string:bgcolor:#50248D "Battery level ${bl}%"
-					fi
+			if [ "$bl" -lt "10" ]
+				then notify-send -h string:bgcolor:#c63307 -h string:fgcolor:#FFFFFF "Battery level ${bl}%" -i battery
+			elif [ "$bl" -lt "20" ]
+				then notify-send -h string:bgcolor:#c6cc07 -h string:fgcolor:#000000 "Battery level ${bl}%" -i battery
+			fi
 		else if [ -f /tmp/.bat.lock ]
 			then echo "Aborting hibernation, battery is being charged"
 			notify-send "Aborting hibernation, battery is being charged"
