@@ -17,9 +17,6 @@
 # License GPL v2
 # https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-sleep 30
-# This delay is to add time for all the programs load during boot time. (My case, you may remove it you like)
-
 while [ 1 ]
 	do for b in  /sys/class/power_supply/BAT*/status;do statusquo=$(cat "${b}");done
 	sleep 30
@@ -27,9 +24,9 @@ while [ 1 ]
 			then bl=$(cat /sys/class/power_supply/BAT1/capacity | awk '{print $1}')
 			echo "The battery is being monitored ${bl}%" > /tmp/.bat.log
 			if [ "$bl" -lt "5" ]
-				then notify-send -h string:bgcolor:#990000 -h string:fgcolor:#FFFFFF "Shutting down in 20 seconds, battery level ${bl}%" -i battery -u critical
-				sleep 20
-				systemctl hibernate
+				then notify-send -h string:bgcolor:#990000 -h string:fgcolor:#FFFFFF "Shutting down in 10 seconds, battery level ${bl}%" -i battery -u critical
+				sleep 10
+				systemctl suspend
 			fi
 			if [ "$bl" -lt "10" ]
 				then notify-send -h string:bgcolor:#c63307 -h string:fgcolor:#FFFFFF "Battery level ${bl}%" -i battery
