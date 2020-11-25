@@ -1,0 +1,183 @@
+#!/bin/bash
+
+# return instructions of usage
+usage(){
+echo "Media script check the requirements and best bitrate for a video"
+echo "$0 video"
+echo "Use -d for debugging"
+echo ""
+exit 1
+}
+[ -z ${1} ] && usage
+
+
+# Check if the video codec is hevc. If it is then check if the cv argumment was passed on to convert it again.
+function videocheck(){
+if [[ $videocodec == "hevc" ]]
+	then echo "This video is already on h265 format, not doing the convertion. If you want to convert run again with a second argument cv"
+	exit 1
+	else echo "The video codec original is ${videocodec}, converting to hevc"
+fi
+}
+
+if [[ "${2}" == "cv" ]]
+	then videocheck
+fi
+
+# Tracking
+[ ! -d "${HOME}/.config/gauge" ] && mkdir -p "${HOME}/.config/gauge"
+
+# Variables
+entrada=$(realpath "${1}")
+processor=$(cat /proc/cpuinfo | grep processor | wc -l)
+filme=$(basename "${entrada}" | tr -d '\ \-\_')
+tempo=$(mktemp -d ${HOME}/.config/gauge/${filme}XXXXX)
+ffprobe "${entrada}" -show_streams 2>&1 > "${tempo}/stream.txt"
+altura=$(cat "${tempo}/stream.txt" | grep "^height=" | cut -d "=" -f 2)
+largura=$(cat "${tempo}/stream.txt" | grep "^width=" | cut -d "=" -f 2)
+quadro=$(cat "${tempo}/stream.txt" | grep "avg_frame_rate" | cut -d "=" -f 2 | cut -d "/" -f 1 | sort -r | sed -n 1p)
+[ "${quadro}" -gt 100 ] && quadro=$(echo $((${quadro} / 1001)) | cut -d "." -f 1)
+actionfactor=$(( ${altura} * ${largura} * ${quadro} * 8 / 1007 / 100))
+[[ "${actionfactor}" -lt 1000 ]] && actionfactor=1${actionfactor} || echo "Actionfactor = ${actionfactor}" >> "/tmp/${filme}.txt"
+arq="$(basename "${entrada}")"
+ext="${arq##*.}"
+input=/mnt/ramdisk/$(echo "${entrada}" | md5sum -t | awk '{print $1}').${ext}
+output="${input}.h265.mp4"
+
+# Make a copy to preserve the original file
+echo "Please wait. Getting ${entrada} digital signature"
+echo "${entrada} = $(basename ${input} | sed "s/\.${ext}//g")"
+echo "Copying to ${input}"
+cp "${entrada}" "${input}"
+audio=$(mediainfo "${input}" | grep Format | grep DTS | cut -d ":" -f 2 | awk '{print $1}')
+channels=$(mediainfo "${input}" | grep channel | cut -d ":" -f 2 | awk '{print $1}')
+
+
+# If it worked clean the rubbish
+function worked(){
+	echo "Success !!"
+	rm "${input}"
+	if [ ${ext} != mp4 ]
+ 		then mv "${output}" "$(echo ${entrada} | sed "s/\.${ext}/\.mp4/g")"
+ 		rm "${entrada}"
+ 		else mv "${output}" "${entrada}"
+	fi
+}
+
+# If it did not work, create a log with the error and clean the fragments preserving the original file for further investigation
+function nwork(){
+	echo "The convertion failed, you have 30 seconds to check before the files are deleted."
+    # telegram-send --caption "The convertion of $(basename ${entrada}) failed" --file "${entrada}.log"
+    sleep 30
+	echo "cleaning"
+	rm "${input}"
+	rm "${output}"
+	exit 1
+}
+
+function guardar(){
+cp "${output}" "${entrada}_timed_wrong.mp4"
+}
+
+function scanoutput(){
+# Check the converted file to determine if the Audio and Video where successfully converted. 
+# Taking also into consideration the length of the file to avoid errors of synchronization on the final file
+echo "Checking convertion"
+audioc=$(ffprobe "${output}" 2>&1 | grep Stream | grep Audio | cut -d ":" -f 3 | awk '{print $1}')
+if [ ! -z "${audioc}" ]
+	then echo "Audio = OK"
+else echo "Audio = ERROR There is no Audio Track, the convertion failed."
+	echo "There is no Audio Track, the convertion failed." >> "${entrada}.log"
+	telegram-send --caption "Convertion of $(basename ${entrada}) failed, no audio track" --file "${entrada}.log"
+	nwork
+	exit 1
+fi
+videoc=$(ffprobe "${output}" 2>&1 | grep Stream | grep Video | cut -d ":" -f 3 | awk '{print $1}')
+if [ ! -z "${videoc}" ]
+	then echo "Video = OK"
+else echo "Video = ERROR There is no Video Track, the convertion failed."
+	echo "There is no Video Track, the convertion failed." >> "${entrada}.log"
+	telegram-send --caption "Convertion of $(basename ${entrada}) failed, no video track" --file "${entrada}.log"
+	nwork
+	exit 1
+fi
+
+timec=$(mediainfo "${output}" | grep Duration | uniq | cut -d ":" -f 2 | sed 's/\ min\ //g' | sed 's/\ s//g' |awk '{print $1}' | sort -r | uniq | sed -n 1p)
+timed=$(mediainfo "${entrada}" | grep Duration | uniq | cut -d ":" -f 2 | sed 's/\ min\ //g' | sed 's/\ s//g' |awk '{print $1}' | sort -r | uniq | sed -n 1p)
+timee=$(echo $((${timec} - ${timed})))
+if [[ "${timee}" -eq "0" ]]
+	then echo "Duration = OK"
+else echo "Lenght = ERROR The lengh of the video is ${timec} but the original is ${timed}, the convertion failed."
+	echo "Since the problem is related to time and I do not know what happened, check ${entrada}_timed_wrong.mp4"
+	echo "Convertion of $(basename '${entrada}') failed, the lenght ${timec} converted and ${timed} original.\n Check ${entrada}_timed_wrong.mp4" >> "${entrada}.log"
+	telegram-send --caption "Convertion of $(basename "${entrada}") failed, the lenght ${timec} converted and ${timed} original. Check the copy on the original's folder" --file "${entrada}.log"
+	guardar
+	nwork
+	exit 1
+fi
+worked
+}
+
+
+function database(){
+echo "Writting in the database"
+videoin="${entrada}"
+origwid="${largura}"
+newresolution="${largura}x${altura}"
+audiochannels="${channels}"
+vcodec="${videocodec}"
+nvcodec="hevc"
+naudioc="6"
+
+# Check if the database exits if not create it and enter the data
+if [ ! -f videos.db ]
+	then sqlite3 videos.db 'CREATE TABLE "convertions" ("id" INTEGER PRIMARY KEY AUTOINCREMENT,"file" TEXT,"originalwidth" INTEGER,"newresolution" TEXT,"audiochannels" TEXT,"videocodec" TEXT,"nvcodec" TEXT,"naudioc" INTERGER);'
+fi
+echo "I am going to run" sqlite3 videos.db "insert into convertions (file,originalwidth,newresolution,audiochannels,videocodec,nvcodec,naudioc) values (\"$videoin\",\"$origwid\",\"$newresolution\",\"$audiochannels\",\"$vcodec\",\"$nvcodec\",\"$naudioc\");"
+sqlite3 videos.db "insert into convertions (file,originalwidth,newresolution,audiochannels,videocodec,nvcodec,naudioc) values (\"$videoin\",\"$origwid\",\"$newresolution\",\"$audiochannels\",\"$vcodec\",\"$nvcodec\",\"$naudioc\");"
+}
+
+# Preserve uncompressed DTS sound
+function dts(){
+echo "Convertendo keeping DTS audio"
+ffmpeg -hide_banner -threads ${processor} -i "${input}" -vaapi_device /dev/dri/renderD128 -vcodec hevc_vaapi -vf format='nv12|vaapi,hwupload' -profile:v 1 -c:a dts -strict -2 -b:a 768k -movflags faststart -map 0:v:0 -map 0:a? -map -0:s? -y "${output}"
+}
+
+# Convertion of a video with DTS audio
+if [ "${audio}" = "DTS" ]
+then dts
+scanoutput
+database
+exit 1
+fi
+
+# Convertion from mono or stereo to 5.1 surround sound, Keeping anything greater than 5.1 as it is.
+case ${channels} in
+	1) ffmpeg -hide_banner -threads ${processor} -i "${input}" -vaapi_device /dev/dri/renderD128 -vcodec hevc_vaapi -vf format='nv12|vaapi,hwupload' -profile:v 1 -r 25 -map 0:v -y "${output}.hevc"
+	ffmpeg -hide_banner -threads ${processor} -i "${input}" -c:a eac3 -b:a 192k -r "${quadros}" -filter_complex "[0:a]join=inputs=1:channel_layout=5.1:map=0.0-FL|0.0-FR|0.0-FC|0.0-LFE|0.0-BL|0.0-BR[a]" -map "[a]" -r 25 -y "${output}.ac3"
+	ffmpeg -hide_banner -threads ${processor} -i "${output}.hevc" -i "${output}.ac3" -c copy -r 25 -movflags faststart -y "${output}"
+	scanoutput
+	rm "${output}.hevc"
+	rm "${output}.ac3"
+	database
+	;;
+	2) ffmpeg -hide_banner -threads ${processor} -i "${input}" -vaapi_device /dev/dri/renderD128 -vcodec hevc_vaapi -vf format='nv12|vaapi,hwupload' -profile:v 1 -map 0:v -r 25 -y "${output}.hevc"
+	ffmpeg -hide_banner -threads ${processor} -i "${input}" -c:a eac3 -b:a 192k -r 25 -filter_complex "[0:a]join=inputs=1:channel_layout=5.1:map=0.0-FL|0.0-FR|0.0-FC|0.0-LFE|0.0-BL|0.0-BR[a]" -map "[a]" -y "${output}.ac3"
+	ffmpeg -hide_banner -threads ${processor} -i "${output}.hevc" -i "${output}.ac3" -c copy -r 25 -movflags faststart -y "${output}"
+	scanoutput
+	rm "${output}.hevc"
+	rm "${output}.ac3"
+	database
+	;;
+	6) ffmpeg -hide_banner -threads ${processor} -i "${input}" -vaapi_device /dev/dri/renderD128 -vcodec hevc_vaapi -vf format='nv12|vaapi,hwupload' -profile:v 1 -c:a eac3 -b:a 192k -ac 6 -movflags faststart -map 0:v:0 -map 0:a? -map -0:s? -y "${output}"
+	scanoutput
+	database
+	;;
+	*) ffmpeg -hide_banner -threads ${processor} -i "${input}" -vaapi_device /dev/dri/renderD128 -vcodec hevc_vaapi -vf format='nv12|vaapi,hwupload' -profile:v 1 -c:a dts -strict -2 -b:a 768k -movflags faststart -map 0:v:0 -map 0:a? -map -0:s? -y "${output}" 
+	scanoutput
+	database
+	;;
+esac
+
+
+# ffmpeg -hide_banner-threads ${processor} -i "${input}" -vaapi_device /dev/dri/renderD128 -vcodec hevc_vaapi -vf format='nv12|vaapi,hwupload,scale_vaapi=w=-1:h=-1' -profile:v 1 -b:v ${actionfactor}k -c:a dts -strict -2 -b:a 768k -movflags faststart -map 0:v:0 -map 0:a? -map -0:s? -y "${output}"
