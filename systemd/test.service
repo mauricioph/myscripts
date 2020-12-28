@@ -1,0 +1,12 @@
+# file /etc/systemd/system/wakelock.service
+
+[Unit]
+Description=change boot animation
+
+[Service]
+User=root
+Type=forking
+ExecStart=/usr/local/bin/randomply
+
+[Install]
+WantedBy=cron.service
