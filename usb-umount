@@ -1,0 +1,9 @@
+#!/bin/bash
+
+devi=$(mount | grep dev/sd | awk '{print $1}' | dmenu -l 10 -p "Which device you want to umount")
+
+sudo umount "${devi}"
+
+ismounted=$(lsblk -lp | grep "part $" | grep ${devi} | awk '{print $1}')
+
+[[ ${devi} == ${ismounted} ]] && notify-send -h string:bgcolor:#009900 "Successfully umounted ${devi}"

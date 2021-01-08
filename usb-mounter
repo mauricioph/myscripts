@@ -1,0 +1,24 @@
+#!/bin/bash
+# usb mounter
+mounter=$(lsblk -lp | grep "part $" | awk '{print $1 " ( " $4 " ) "}')
+dispositivo=$(echo "${mounter}" | dmenu -p "Which device to mount?" | awk '{print $1}')
+
+# mount "${dispositivo}"
+
+checkmount(){
+monted=$(mount | grep "${dispositivo}" | awk '{print $3}')
+
+[ -z "${monted}" ] && echo "Not in fstab" || echo "mounted on ${monted}"
+
+}
+
+checkmount
+
+dirs=$(find /mnt /media -maxdepth 3 -type d  2>/dev/null)
+here=$(echo "${dirs}" | dmenu -p "Select the folder")
+
+[ ! -d "${here}" ] && echo "Folder not found, it will be created." && mkdir -p "${here}"
+
+sudo mount "${dispositivo}" "${here}"
+
+checkmount
