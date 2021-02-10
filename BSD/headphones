@@ -1,0 +1,8 @@
+#!/usr/local/bin/bash
+
+status=$(sysctl hw.snd.default_unit | cut -d " " -f 2)
+
+[[ ${status} == 0 ]] && sysctl hw.snd.default_unit=1 && exit
+[[ ${status} == 1 ]] && sysctl hw.snd.default_unit=0 && exit
+
+

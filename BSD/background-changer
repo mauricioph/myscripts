@@ -1,0 +1,9 @@
+#!/usr/local/bin/bash
+
+while [ 1 ]
+do for i in /usr/local/share/backgrounds/ghostbsd/*.jpg
+do feh --bg-scale "${i}"
+sleep 30
+done
+sleep 10
+done
