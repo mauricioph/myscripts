@@ -1,7 +1,9 @@
 #!/usr/local/bin/bash
+# Infinite loop cahnging the wallpaper for the default wallpapers in GhostBSD
 
 while [ 1 ]
-do for i in /usr/local/share/backgrounds/ghostbsd/*.jpg
+do # Change the folder on the for loop to where the wallpapers are in your system.
+for i in /usr/local/share/backgrounds/ghostbsd/*.jpg
 do feh --bg-scale "${i}"
 sleep 30
 done
