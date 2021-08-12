@@ -1,0 +1,22 @@
+#!/bin/bash
+[ -z $1 ] && echo "Usage: $0 URL where URL is a youtube playlist" && exit 1
+youtube-dl --yes-playlist --write-thumbnail -x --user-agent "Firefox" "$1"
+
+for m4a in *.m4a;
+do nome=$(echo "${m4a}" | cut -d "-" -f 1)
+ffmpeg -i "${m4a}" -y "${nome}.flac";
+echo "rm "${m4a}"."
+done
+
+for opus in *.opus;
+do nome=$(echo "${opus}" | cut -d "-" -f 1)
+ffmpeg -i "${opus}" -y "${nome}.flac";
+echo "rm "${opus}"."
+done
+
+mlk=$(ls *.webp | sed -n 1p)
+[ -z ${mlk} ] && mlk=$(ls *.jpg | sed -n 1p)
+
+gimp "${mlk}"
+
+easytag ./
