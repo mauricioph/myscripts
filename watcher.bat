@@ -16,6 +16,7 @@ if "%min:~0,1%" == " " set min=0%min:~1,1%
 set secs=%time:~6,2%
 if "%secs:~0,1%" == " " set secs=0%secs:~1,1%
 set datetimef=%day%-%month%-%year%_%hour%-%min%-%secs%
+set datetimeb=%day%-%month%-%year%
 
 echo Started on %datetimef%
 
@@ -32,7 +33,16 @@ if "%hour%" == "22" set programme="Be_Inspired"
 if "%hour%" == "23" set programme="Love_Talk"
 echo Setting up for %programme%
 
-
+rem Define folders
+if "%programme%" == "unknown" set folder=C:\Users\PC2\Documents\Unknown
+if "%programme%" == "Breakfast" set folder=C:\Users\PC2\Documents\Breakfast
+if "%programme%" == "Be_Inspired" set folder=C:\Users\PC2\Documents\Be Inspired
+if "%programme%" == "BeatDepression" set folder=C:\Users\PC2\Documents\Beat Depressions
+if "%programme%" == "LLL" set folder=C:\Users\PC2\Documents\LLL
+if "%programme%" == "Love_Talk" set folder=C:\Users\PC2\Documents\Love  Talk Show
+if "%programme%" == "MiddayBoost" set folder=C:\Users\PC2\Documents\Midday Boost
+if "%programme%" == "Str8up" set folder=C:\Users\PC2\Documents\str8upradio
+if "%programme%" == "ROD" set folder=C:\Users\PC2\Documents\ROD
 
 rem loop watching folder
 :loop
@@ -44,7 +54,7 @@ rem start "" /w "c:\droplet_path\droplet.exe" "%%a"
 
 ping -n 10 localhost >nul
 rem del "%%a"
-echo moved %%a to folder 
+echo moved %%a to %folder%\%datetimeb%\
 )
 )
 ping -n 10 localhost >nul
