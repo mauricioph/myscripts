@@ -1,0 +1,18 @@
+
+minuto=$(date +%M)
+alarm="$1"
+
+function tocaalarm() {
+play /usr/share/sounds/sound-icons/trumpet-12.wav
+}
+while [ 1 ]
+do echo "${minuto} ${alarm}"
+[[ ${minuto} = ${alarm} ]] && tocaalarm && exit 1
+sleep 1;
+
+minuto=$(date +%M)
+
+clear
+done
+
+
