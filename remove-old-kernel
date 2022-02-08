@@ -1,9 +1,25 @@
 #!/bin/bash
+# check if the user has super powers
 [ $USER != root ] && echo "Please run as root" && exit 1
 
-x=$(dpkg --list | grep -i linux-image | grep ^rc| awk '{ print $2}')
+# make sure we do not delete the running kernel and images. On some of my systems I have realtime kernel
+kernel="linux-image-$(uname -r)"
+image="linux-image-amd64"
+realtime="linux-image-rt-amd64"
 
-[ -z ${x} ] && echo "There is only the current kernel available, It's all good."
-[ ! -z "${x}" ] &&  echo "removing ${x}" && apt --purge remove ${x}
+# remove the selected kernel
+function removekernel(){
+	apt --purge remove ${x}
+}
 
-echo "Done"
+# run through all the installed kernels and remove the excess
+for x in $(dpkg --list | grep -i linux-image | awk '{print $2}')
+do echo "Checking ${x}"
+	[ "${x}" = "${kernel}" ] && x="" && echo "It is the running kernel"
+	[ "${x}" = "${image}" ] && x="" && echo "It is the running image"
+	[ "${x}" = "${realtime}" ] && x="" && echo "It is the running real time image"
+	[ ! -z "${x}" ] && removekernel
+done
+
+# send a happy message that it is all done
+[ -z "${x}" ] && echo "There is only 1 kernel in this system, nothing to be done."
