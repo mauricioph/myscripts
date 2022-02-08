@@ -17,26 +17,39 @@
 # License GPL v2
 # https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
+# Function to check if the cable has been connected and abort the monitor, alerts and commands.
+function checkbat(){
+	online=$(cat /sys/class/power_supply/ACAD/online)
+	[ ${online} = 1 ] && rm /tmp/.bat.log && echo "Aborting hibernation, battery is being charged" && notify-send "Aborting hibernation, battery is being charged" && statusquo="Charging"
+	[ ${online} = 0 ] && systemctl suspend
+}
+
+# Infinity loop to check the battery status
 while [ 1 ]
 	do for b in  /sys/class/power_supply/BAT*/status;do statusquo=$(cat "${b}");done
 	sleep 30
 		if [ $statusquo = "Discharging" ]
 			then bl=$(cat /sys/class/power_supply/BAT1/capacity | awk '{print $1}')
+			# Set the status of the battery as being monitored in case the power is not plugged
 			echo "The battery is being monitored ${bl}%" > /tmp/.bat.log
+
+			# If the battery reaches critical level check if the user plug the power or suspend the computer
 			if [ "$bl" -lt "5" ]
 				then notify-send -h string:bgcolor:#990000 -h string:fgcolor:#FFFFFF "Shutting down in 10 seconds, battery level ${bl}%" -i battery -u critical
 				sleep 10
-				systemctl suspend
+				checkbat
 			fi
+			# Notify the user about the battery usage with coloured notification
 			if [ "$bl" -lt "10" ]
 				then notify-send -h string:bgcolor:#c63307 -h string:fgcolor:#FFFFFF "Battery level ${bl}%" -i battery
 			elif [ "$bl" -lt "20" ]
 				then notify-send -h string:bgcolor:#c6cc07 -h string:fgcolor:#000000 "Battery level ${bl}%" -i battery
 			fi
-		else if [ -f /tmp/.bat.lock ]
+			# If the battery is charging abort commands and remove monitoring log
+		else if [ -f /tmp/.bat.log ]
 			then echo "Aborting hibernation, battery is being charged"
 			notify-send "Aborting hibernation, battery is being charged"
-			rm /tmp/.bat.lock
+			rm /tmp/.bat.log
 			fi
 		fi
 	done
