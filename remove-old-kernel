@@ -1,25 +1,16 @@
 #!/bin/bash
-# check if the user has super powers
 [ $USER != root ] && echo "Please run as root" && exit 1
 
-# make sure we do not delete the running kernel and images. On some of my systems I have realtime kernel
-kernel="linux-image-$(uname -r)"
-image="linux-image-amd64"
-realtime="linux-image-rt-amd64"
+for x in $(dpkg --list | grep -i linux-image | awk '{ print $2}')
+do
+	kernel="linux-image-$(uname -r)"
+	realtime="linux-image-rt-amd64"
 
-# remove the selected kernel
-function removekernel(){
-	apt --purge remove ${x}
-}
+	[ "${x}" = "${kernel}" ] && x="" && b="${kernel}"
+	[ "${x}" = "${realtime}" ] && x="" && b="${realtime}"
 
-# run through all the installed kernels and remove the excess
-for x in $(dpkg --list | grep -i linux-image | awk '{print $2}')
-do echo "Checking ${x}"
-	[ "${x}" = "${kernel}" ] && x="" && echo "It is the running kernel"
-	[ "${x}" = "${image}" ] && x="" && echo "It is the running image"
-	[ "${x}" = "${realtime}" ] && x="" && echo "It is the running real time image"
-	[ ! -z "${x}" ] && removekernel
+[ -z "${x}" ] && echo "Cannot remove ${b} as it is in use, It's all good."
+
+[ ! -z "${x}" ] &&  echo "removing ${x}" && apt --purge remove ${x}
+
 done
-
-# send a happy message that it is all done
-[ -z "${x}" ] && echo "There is only 1 kernel in this system, nothing to be done."
