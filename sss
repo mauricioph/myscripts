@@ -1,6 +1,23 @@
 #!/bin/bash
-# Take a screenshot used on i3 window manager, but usefull for all wm.
-
-sleep 5
-scrot $(mktemp /tmp/screenshot.XXXX.png)
+# Take a screenshot used on DWM, but usefull for all wm.
+# Get ready
+sleep 3
+# Get a random name
+imagem="$(tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c ${1:-21}; echo)"
+# Cheese
+scrot "/tmp/screenshot-${imagem}.png" 
+# Save the path of the image to the clipboard
+echo "/tmp/screenshot-${imagem}.png" | xclip -sel c 
+# Give an audible feedback
 play /usr/share/sounds/freedesktop/stereo/camera-shutter.oga
+# Open it
+opi=$(echo -e "Open\nEdit\nCancel" | dmenu -l 3 -p "Selection:")
+
+case "${opi}" in 
+ 	Open) sxiv "/tmp/screenshot-${imagem}.png"
+	;;
+	Edit) gimp "/tmp/screenshot-${imagem}.png"
+	;;
+	Cancel) rm "/tmp/screenshot-${imagem}.png"
+	;;
+esac
