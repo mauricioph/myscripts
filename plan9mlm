@@ -1,0 +1,7 @@
+#!/bin/bash
+# Based on plan9 and Ls script
+sel="$(xclip -o)"
+[[ -z "${sel}" ]] && zenity --info --title "Empty" --text "The clipboard is empty" && exit
+
+[[ -f "${sel}" ]] && xdg-open "${sel}"
+[[ -d "${sel}" ]] && cd "${sel}"
