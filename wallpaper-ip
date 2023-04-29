@@ -1,0 +1,11 @@
+#!/bin/bash
+
+ip=$(ip a | awk '/192/ {print $2}' | sed 's/\/24//')
+img=$(ls /usr/share/backgrounds/*.jpg | shuf | sed -n 1p)
+
+[[ -z "${ip}" ]] && transp=$(echo "convert "${img}" -background red -fill white -pointsize 20 lable:OFFLINE -gravity center +swap -append TestFile.jpg") || transp=$(echo "convert "${img}" -background green -fill black -pointsize 20 label:"${ip}" -gravity center +swap -append /tmp/.TestFile.jpg")
+echo "${transp}"
+
+${transp}
+
+feh --bg-scale "/tmp/.TestFile.jpg"

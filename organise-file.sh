@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[ `pwd` = "$HOME" ] && echo -e "You should not run this script on your home folder, it will mess your configs. \nPlease create a folder and run this script from there with all the messy files and subfolders inside it.\nIf you install this script in /usr/local/bin then it will create the folders on your home folder, but if you copy it to a folder and run from there it will organise only that folder." && exit
+[ `pwd` = "$HOME" ] && echo -e "You should not run this script on your home folder, it will mess your configs. \nPlease create a folder and run this script from there with all the messy files and subfolders inside it.\nIf you install this script in /usr/local/bin then it will create the folders on your home folder, but if you copy it to a folder and run from there it will organise only that folder." && exit 1
 
 function installed(){
 installation=false
