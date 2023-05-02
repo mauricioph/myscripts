@@ -19,8 +19,9 @@
 
 # Function to check if the cable has been connected and abort the monitor, alerts and commands.
 function checkbat(){
+	tempo="/run/users/$(id -u)/"
 	online=$(cat /sys/class/power_supply/ACAD/online)
-	[ ${online} = 1 ] && rm /tmp/.bat.log && echo "Aborting hibernation, battery is being charged" && notify-send "Aborting hibernation, battery is being charged" && statusquo="Charging"
+	[ ${online} = 1 ] && rm ${tempo}bat.log && echo "Aborting hibernation, battery is being charged" && notify-send "Aborting hibernation, battery is being charged" && statusquo="Charging"
 	[ ${online} = 0 ] && systemctl suspend
 }
 
@@ -31,7 +32,7 @@ while [ 1 ]
 		if [ $statusquo = "Discharging" ]
 			then bl=$(cat /sys/class/power_supply/BAT1/capacity | awk '{print $1}')
 			# Set the status of the battery as being monitored in case the power is not plugged
-			echo "The battery is being monitored ${bl}%" > /tmp/.bat.log
+			echo "The battery is being monitored ${bl}%" > ${tempo}bat.log
 
 			# If the battery reaches critical level check if the user plug the power or suspend the computer
 			if [ "$bl" -lt "5" ]
@@ -46,10 +47,10 @@ while [ 1 ]
 				then notify-send -h string:bgcolor:#c6cc07 -h string:fgcolor:#000000 "Battery level ${bl}%" -i battery
 			fi
 			# If the battery is charging abort commands and remove monitoring log
-		else if [ -f /tmp/.bat.log ]
+		else if [ -f ${tempo}bat.log ]
 			then echo "Aborting hibernation, battery is being charged"
 			notify-send "Aborting hibernation, battery is being charged"
-			rm /tmp/.bat.log
+			rm {tempo}bat.log
 			fi
 		fi
 	done
