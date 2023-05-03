@@ -1,21 +1,31 @@
 #!/bin/bash
+# Script to mount hard drives and usb in specific folder.
+# who am I?
+[[ $(id -u) != '0' ]] && echo "Must run as root!" && exit 1
+listblock=$(which -a lsblk | sed -n 1p)
+idblock=$(which -a blkid | sed -n 1p)
+[[ -z ${idblock} ]] && idblock=/sbin/blkid
 
 # who is my hard driver?
 harddrive=$(mount | grep " / " | awk '{print $1}' | sed 's/\/dev\///g' | tr -d '[:digit:]')
 
-lsblk | grep part | awk '{print $1,$7}' > /run/user/$(id -u)/partitions
+# Get all the partitions and take my hard drive out of it
+partitions="/run/user/$(id -u)/partitions"
+[[ ! -d /run/user/$(id -u)/ ]] && mkdir -p /run/user/$(id -u)
+${listblock} | grep part | awk '{print $1,$7}' > ${partitions}
+sed '/'${harddrive}'/d' -i ${partitions}
 
-sed '/'${harddrive}'/d' -i /run/user/$(id -u)/partitions
-
+# Check the other partitions and mount as needed.
 while read line
 do mountp=$(echo "${line}" | awk '{print $2}')
 [[ -z "${mountp}" ]] && parti=$(echo "${line}" | awk '{print $1}') || partid=sda1 
 partid=$(echo "${parti}" | tr -dc '[:alnum:]')
-puid=$(/sbin/blkid | grep ${partid} | sed 's/\ /\n/g' | grep ^UUID | cut -d \" -f 2)
+puid=$(${idblock} | grep ${partid} | sed 's/\ /\n/g' | grep ^UUID | cut -d \" -f 2)
 
-[[ ! -d "/Volumes/${puid}" ]] && sudo mkdir -p "/Volumes/${puid}"
+[[ ! -d "/Volumes/${puid}" ]] && mkdir -p "/Volumes/${puid}"
 
-sudo mount "/dev/disk/by-uuid/${puid}" "/Volumes/${puid}"
+mount "/dev/disk/by-uuid/${puid}" "/Volumes/${puid}"
 
-done < /run/user/1000/partitions
+done < ${partitions}
 
+${listblock}
