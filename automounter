@@ -7,7 +7,7 @@ idblock=$(which -a blkid | sed -n 1p)
 [[ -z ${idblock} ]] && idblock=/sbin/blkid
 
 # who is my hard driver?
-harddrive=$(mount | grep " / " | awk '{print $1}' | sed 's/\/dev\///g' | tr -d '[:digit:]')
+harddrive=$(nvme0n1)
 
 # Get all the partitions and take my hard drive out of it
 partitions="/run/user/$(id -u)/partitions"
