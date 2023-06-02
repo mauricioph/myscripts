@@ -1,0 +1,7 @@
+#!/bin/bash
+device="$(bluetoothctl devices | cut -d " " -f 2-10 | dmenu -l 5)"
+conne=$(echo "${devices}" | awk '{print $1}')
+
+bluetoothctl connect "${conne}"
+
+
