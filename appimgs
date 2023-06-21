@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+#
+#
+
+folder="/home/mauricio/Syncthing/Applications"
+$(ls ${folder}/*.[A-a]pp[I-i]mage | dmenu -l 10 -p "Select the app to run")
