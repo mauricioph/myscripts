@@ -1,14 +1,15 @@
 #!/bin/bash
 playlist1="/run/shm/$(uuidgen).m3u"
 playlist2="/run/shm/$(uuidgen).m3u"
+ytf="${HOME}/Videos/youtube/"
 
+# Create the header of the playlist
 cat <<EOF > ${playlist2}
 #EXTM3U
 EOF
 
-find "${HOME}/Videos/youtube/" -type f | sed '/yml/d' >> "${playlist1}"
-cat "${playlist1}" | shuf | tee /tmp/.files
-mv /tmp/.files "${playlist1}"
+# find the videos on the YouTube folder
+find "${ytf}" -type f | sed '/yml/d' | shuf >> "${playlist1}"
 
 while read line;
 	do nome=$(mediainfo --Inform="General;%FileName%" "${line}")
@@ -16,6 +17,6 @@ while read line;
 		echo "${line}" >> "${playlist2}"
 	done < "${playlist1}"
 
-mpv "${playlist2}"
 rm -f "${playlist1}"
+mpv "${playlist2}"
 rm -f "${playlist2}"
