@@ -1,0 +1,21 @@
+#!/bin/bash
+playlist1="/run/shm/$(uuidgen).m3u"
+playlist2="/run/shm/$(uuidgen).m3u"
+
+cat <<EOF > ${playlist2}
+#EXTM3U
+EOF
+
+find "${HOME}/Videos/youtube/" -type f | sed '/yml/d' >> "${playlist1}"
+cat "${playlist1}" | shuf | tee /tmp/.files
+mv /tmp/.files "${playlist1}"
+
+while read line;
+	do nome=$(mediainfo --Inform="General;%FileName%" "${line}")
+		echo "#EXTINF ${nome}" >> "${playlist2}"
+		echo "${line}" >> "${playlist2}"
+	done < "${playlist1}"
+
+mpv "${playlist2}"
+rm -f "${playlist1}"
+rm -f "${playlist2}"
